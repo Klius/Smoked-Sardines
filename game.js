@@ -307,7 +307,70 @@ function Ship() {
 }
 Ship.prototype = new Drawable();
 
+/**
+*Creates the cannon object that will shoot back to the ship
+*
+*/
+function Cannon() {
+	this.speed = 2;
+	this.bulletPool = new Pool(30);
+	this.bulletPool.init();
 
+	var fireRate = 10;
+	var counter = 0;
+	
+	this.draw = function() {
+		this.context.drawImage(imageRepository.spaceship, this.x, this.y);
+	};
+	this.move = function() {	
+		counter++;
+		// Determine if the action is move action
+		if (KEY_STATUS.left || KEY_STATUS.right ||
+			KEY_STATUS.down || KEY_STATUS.up) {
+			// The ship moved, so erase it's current image so it can
+			// be redrawn in it's new location
+			this.context.clearRect(this.x, this.y, this.width, this.height);
+			
+			// Update x and y according to the direction to move and
+			// redraw the ship. Change the else if's to if statements
+			// to have diagonal movement.
+			if (KEY_STATUS.left) {
+				this.x -= this.speed
+				if (this.x <= 0) // Keep player within the screen
+					this.x = 0;
+			} else if (KEY_STATUS.right) {
+				this.x += this.speed
+				if (this.x >= this.canvasWidth - this.width)
+					this.x = this.canvasWidth - this.width;
+			} 
+			if (KEY_STATUS.up) {
+				this.y -= this.speed
+				if(this.y <= 0)
+					this.y = 0;
+			} else if (KEY_STATUS.down) {
+				this.y += this.speed
+				if (this.y >= this.canvasHeight - this.height)
+					this.y = this.canvasHeight - this.height;
+			}
+			
+			// Finish by redrawing the ship
+			this.draw();
+		}
+		
+		if (KEY_STATUS.space && counter >= fireRate) {
+			this.fire();
+			counter = 0;
+		}
+	};
+	
+	/*
+	 * Fires two bullets
+	 */
+	this.fire = function() {
+		this.bulletPool.get(this.x, this.y, 3);
+	};
+}
+Cannon.prototype = new Drawable();
  /**
  * Creates the Game object which will hold all objects and data for
  * the game.
@@ -347,6 +410,9 @@ function Game() {
 			Bullet.prototype.canvasWidth = this.mainCanvas.width;
 			Bullet.prototype.canvasHeight = this.mainCanvas.height;
 			
+			Cannon.prototype.context = this.shipContext;
+			Cannon.prototype.canvasWidth = this.shipCanvas.width;
+			Cannon.prototype.canvasHeight = this.shipCanvas.height;
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
@@ -358,7 +424,10 @@ function Game() {
 			var shipStartY = this.shipCanvas.height/2;
 			this.ship.init(shipStartX, shipStartY, imageRepository.spaceship.width,
 			               imageRepository.spaceship.height);
-
+			//Set the cannon to start
+			this.cannon = new Cannon();
+			this.cannon.init(0,0,
+								imageRepository.spaceship.width,imageRepository.spaceship.height);
 			return true;
 		} else {
 			return false;
@@ -368,6 +437,7 @@ function Game() {
 	// Start the animation loop
 	this.start = function() {
 		this.ship.draw();
+		this.cannon.draw();
 		animate();
 	};
 }
@@ -384,6 +454,8 @@ function animate() {
 	game.background.draw();
 	game.ship.move();
 	game.ship.bulletPool.animate(); 
+	game.cannon.move();
+	game.cannon.bulletPool.animate();
 }
 
 
@@ -434,6 +506,14 @@ document.onkeyup = function(e) {
   }
 }
 
+/**
+*Sets up the document to listen to mouse click and fire cannon balls
+*
+*/
+
+document.onclick = function(e){
+
+}
 
 /**	
  * requestAnim shim layer by Paul Irish
