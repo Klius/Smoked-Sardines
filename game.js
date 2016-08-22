@@ -437,7 +437,7 @@ KEY_CODES = {
   98: 'bottom_middle',
   99: 'bottom_right',
   100: 'middle_left',
-  102: '',
+  102: 'middle_right',
 };
 
 // Creates the array to hold the KEY_CODES and sets all their values
