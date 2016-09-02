@@ -30,9 +30,10 @@ var imageRepository = new function() {
 	this.background = new Image();
 	this.spaceship = new Image();
 	this.bullet = new Image();
-
+	this.forn = new Image();
+	
 	// Ensure all images have loaded before starting the game
-	var numImages = 3;
+	var numImages = 4;
 	var numLoaded = 0;
 	function imageLoaded() {
 		numLoaded++;
@@ -49,11 +50,15 @@ var imageRepository = new function() {
 	this.bullet.onload = function() {
 		imageLoaded();
 	}
+	this.forn.onload = function(){
+		imageLoaded();
+	}
 	
 	// Set images src
 	this.background.src = "imgs/bg.png";
 	this.spaceship.src = "imgs/sardina.svg";
 	this.bullet.src = "imgs/bullet.png";
+	this.forn.src = "imgs/forn.svg#idle";
 }
 
 
@@ -293,7 +298,7 @@ function Ship() {
 		
 	};
 	
-	/*
+	/* 
 	 * Fires two bullets
 	 */
 	this.fire = function() {
@@ -316,7 +321,7 @@ function Cannon() {
 	var counter = 0;
 	
 	this.draw = function() {
-		this.context.drawImage(imageRepository.spaceship, this.x, this.y);
+		this.context.drawImage(imageRepository.forn, this.x, this.y);
 	};
 	this.move = function() {	
 		counter++;
@@ -393,7 +398,7 @@ function Game() {
 			//Set the cannon to start
 			this.cannon = new Cannon();
 			this.cannon.init(0,0,
-								imageRepository.spaceship.width,imageRepository.spaceship.height);
+								50,25);
 			return true;
 		} else {
 			return false;
