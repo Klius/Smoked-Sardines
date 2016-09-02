@@ -321,17 +321,12 @@ function Cannon() {
 	var counter = 0;
 	
 	this.draw = function() {
-		this.context.drawImage(imageRepository.forn, this.x, this.y);
+		this.context.drawImage(imageRepository.forn,0,0,50,25, this.x, this.y,50,25);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
 	};
 	this.move = function() {	
 		counter++;
 		// Determine if the action is move action
-		
-		
-		if (KEY_STATUS.space && counter >= fireRate) {
-			this.fire();
-			counter = 0;
-		}
+		this.draw();
 	};
 	
 	/*
