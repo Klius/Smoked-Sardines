@@ -10,13 +10,13 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="50"
-   height="50"
+   width="40"
+   height="70"
    viewBox="0 0 744.09449 1052.3622"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="sardina2.svg">
+   sodipodi:docname="sardina.svg">
   <defs
      id="defs4">
     <linearGradient
@@ -58,7 +58,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.6"
-     inkscape:cx="51.71362"
+     inkscape:cx="18.142191"
      inkscape:cy="18.992486"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -77,17 +77,18 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:label="Capa 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="matrix(0.57133993,0,0,0.99244774,87.844284,132.79435)">
     <g
        id="g4194"
-       transform="matrix(15.724403,0,0,13.326666,-1679.7233,-3082.2053)">
+       transform="matrix(25.493923,-7.6765875,10.89509,12.902346,-5839.4382,-2005.1446)">
       <path
          sodipodi:nodetypes="ccccc"
          inkscape:connector-curvature="0"
