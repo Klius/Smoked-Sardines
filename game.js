@@ -325,6 +325,7 @@ function Forn() {
 	};
 	this.move = function() {	
 		counter++;
+		this.fire();
 		// Determine if the action is move action
 		this.draw();
 	};
@@ -392,7 +393,7 @@ function Game() {
 			               imageRepository.sardina.height);
 			//Set the forn to start
 			this.forn = new Forn();
-			this.forn.init(0,0,200,100);
+			this.forn.init(0,0,100,imageRepository.forn.height);
 			return true;
 		} else {
 			return false;
