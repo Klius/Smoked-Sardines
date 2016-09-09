@@ -1,37 +1,27 @@
-<!DOCTYPE html>
 <html>
-	<head>
-		<title>Space Shooter Demo</title>
-		<style>
-			canvas {
-				position: absolute;
-				top: 0px;
-				left: 0px;
-				background: transparent;
-			}
-			#background {
-				z-index: -2;
-			}
-			#main {
-				z-index: -1;
-			}
-			#ship {
-				z-index: 0;
-			}
-		</style>
-	</head>
-	<body>
-		<!-- The canvas for the panning background -->
-		<canvas id="background" width="600" height="360">
-			Your browser does not support canvas. Please try again with a different browser.
-		</canvas>
-		<!-- The canvas for all enemy ships and bullets -->
-		<canvas id="main" width="600" height="360">
-		</canvas>
-		<!-- The canvas the ship uses (can only move up
-         one forth the screen.) -->
-		<canvas id="ship" width="600" height="360">
-		</canvas>
-		<script src="game.js"></script>
-	</body>
+<head>
+	<style>
+		div.outer-div {
+			height: 97%;
+			width: 600px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		div.middle-div {
+			position: relative;
+			top: 50%;
+			-webkit-transform: translateY(-50%);
+			-ms-transform: translateY(-50%);
+			transform: translateY(-50%);
+		}
+	</style>
+</head>
+<body>
+	<div class="outer-div">
+		<div class="middle-div">
+			<iframe height="600" width="600" src="game.html"></iframe>
+		</div>
+	</div>
+</body>
 </html>

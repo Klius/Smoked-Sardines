@@ -28,7 +28,7 @@ function init() {
 var imageRepository = new function() {
 	// Define images
 	this.background = new Image();
-	this.spaceship = new Image();
+	this.sardina = new Image();
 	this.bullet = new Image();
 	this.forn = new Image();
 	
@@ -44,7 +44,7 @@ var imageRepository = new function() {
 	this.background.onload = function() {
 		imageLoaded();
 	}
-	this.spaceship.onload = function() {
+	this.sardina.onload = function() {
 		imageLoaded();
 	}
 	this.bullet.onload = function() {
@@ -56,9 +56,9 @@ var imageRepository = new function() {
 	
 	// Set images src
 	this.background.src = "imgs/bg.png";
-	this.spaceship.src = "imgs/sardina.svg";
+	this.sardina.src = "imgs/sardina.svg";
 	this.bullet.src = "imgs/bullet.png";
-	this.forn.src = "imgs/forn.svg#idle";
+	this.forn.src = "imgs/forn.svg";
 }
 
 
@@ -116,7 +116,7 @@ Background.prototype = new Drawable();
 
 
 /**
- * Creates the Bullet object which the ship fires. The bullets are
+ * Creates the Bullet object which the sardina fires. The bullets are
  * drawn on the "main" canvas.
  */
 function Bullet() {	
@@ -213,8 +213,8 @@ function Pool(maxSize) {
 	};
 	
 	/*
-	 * Used for the ship to be able to get two bullets at once. If
-	 * only the get() function is used twice, the ship is able to
+	 * Used for the sardina to be able to get two bullets at once. If
+	 * only the get() function is used twice, the sardina is able to
 	 * fire and only have 1 bullet spawn instead of 2.
 	 */
 	this.getTwo = function(x1, y1, speed1, x2, y2, speed2) {
@@ -246,11 +246,11 @@ function Pool(maxSize) {
 
 
 /**
- * Create the Ship object that the player controls. The ship is
- * drawn on the "ship" canvas and uses dirty rectangles to move
+ * Create the Sardina object that the player controls. The sardina is
+ * drawn on the "sardina" canvas and uses dirty rectangles to move
  * around the screen.
  */
-function Ship() {
+function Sardina() {
 	this.speed = 3;
 	this.bulletPool = new Pool(30);
 	this.bulletPool.init();
@@ -259,19 +259,19 @@ function Ship() {
 	//var counter = 0;
 	
 	this.draw = function() {
-		this.context.drawImage(imageRepository.spaceship, this.x, this.y);
+		this.context.drawImage(imageRepository.sardina, this.x, this.y);
 	};
 	this.move = function() {	
 		//counter++;
 		// Determine if the action is move action
 		if (KEY_STATUS.left || KEY_STATUS.right ||
 			KEY_STATUS.down || KEY_STATUS.up) {
-			// The ship moved, so erase it's current image so it can
+			// The sardina moved, so erase it's current image so it can
 			// be redrawn in it's new location
 			this.context.clearRect(this.x, this.y, this.width, this.height);
 			
 			// Update x and y according to the direction to move and
-			// redraw the ship. Change the else if's to if statements
+			// redraw the Sardina. Change the else if's to if statements
 			// to have diagonal movement.
 			if (KEY_STATUS.left) {
 				this.x -= this.speed
@@ -292,7 +292,7 @@ function Ship() {
 					this.y = this.canvasHeight - this.height;
 			}
 			
-			// Finish by redrawing the ship
+			// Finish by redrawing the Sardina
 			this.draw();
 		}
 		
@@ -306,13 +306,13 @@ function Ship() {
 		                       this.x+33, this.y, 3);
 	};
 }
-Ship.prototype = new Drawable();
+Sardina.prototype = new Drawable();
 
 /**
-*Creates the cannon object that will shoot back to the ship
+*Creates the forn object that will shoot back to the sardina
 *
 */
-function Cannon() {
+function Forn() {
 	this.speed = 2;
 	this.bulletPool = new Pool(30);
 	this.bulletPool.init();
@@ -321,7 +321,7 @@ function Cannon() {
 	var counter = 0;
 	
 	this.draw = function() {
-		this.context.drawImage(imageRepository.forn,0,0,50,25, this.x, this.y,50,25);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.drawImage(imageRepository.forn,0,0,this.width,this.height, this.x, this.y,this.width,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
 	};
 	this.move = function() {	
 		counter++;
@@ -336,7 +336,7 @@ function Cannon() {
 		this.bulletPool.get(this.x, this.y, 3);
 	};
 }
-Cannon.prototype = new Drawable();
+Forn.prototype = new Drawable();
  /**
  * Creates the Game object which will hold all objects and data for
  * the game.
@@ -352,7 +352,7 @@ function Game() {
 	this.init = function() {
 		// Get the canvas elements
 		this.bgCanvas = document.getElementById('background');
-		this.shipCanvas = document.getElementById('ship');
+		this.shipCanvas = document.getElementById('sardina');
 		this.mainCanvas = document.getElementById('main');
 		
 		// Test to see if canvas is supported. Only need to
@@ -368,32 +368,31 @@ function Game() {
 			Background.prototype.canvasWidth = this.bgCanvas.width;
 			Background.prototype.canvasHeight = this.bgCanvas.height;
 			
-			Ship.prototype.context = this.shipContext;
-			Ship.prototype.canvasWidth = this.shipCanvas.width;
-			Ship.prototype.canvasHeight = this.shipCanvas.height;
+			Sardina.prototype.context = this.shipContext;
+			Sardina.prototype.canvasWidth = this.shipCanvas.width;
+			Sardina.prototype.canvasHeight = this.shipCanvas.height;
 			
 			Bullet.prototype.context = this.mainContext;
 			Bullet.prototype.canvasWidth = this.mainCanvas.width;
 			Bullet.prototype.canvasHeight = this.mainCanvas.height;
 			
-			Cannon.prototype.context = this.shipContext;
-			Cannon.prototype.canvasWidth = this.shipCanvas.width;
-			Cannon.prototype.canvasHeight = this.shipCanvas.height;
+			Forn.prototype.context = this.shipContext;
+			Forn.prototype.canvasWidth = this.shipCanvas.width;
+			Forn.prototype.canvasHeight = this.shipCanvas.height;
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
 			
-			// Initialize the ship object
-			this.ship = new Ship();
-			// Set the ship to start in the middle of the canvas
-			var shipStartX = this.shipCanvas.width/2 - imageRepository.spaceship.width;
+			// Initialize the sardina object
+			this.sardina = new Sardina();
+			// Set the sardina to start in the middle of the canvas
+			var shipStartX = this.shipCanvas.width/2 - imageRepository.sardina.width;
 			var shipStartY = this.shipCanvas.height/2;
-			this.ship.init(shipStartX, shipStartY, imageRepository.spaceship.width,
-			               imageRepository.spaceship.height);
-			//Set the cannon to start
-			this.cannon = new Cannon();
-			this.cannon.init(0,0,
-								50,25);
+			this.sardina.init(shipStartX, shipStartY, imageRepository.sardina.width,
+			               imageRepository.sardina.height);
+			//Set the forn to start
+			this.forn = new Forn();
+			this.forn.init(0,0,200,100);
 			return true;
 		} else {
 			return false;
@@ -402,8 +401,8 @@ function Game() {
 	
 	// Start the animation loop
 	this.start = function() {
-		this.ship.draw();
-		this.cannon.draw();
+		this.sardina.draw();
+		this.forn.draw();
 		animate();
 	};
 }
@@ -418,10 +417,10 @@ function Game() {
 function animate() {
 	requestAnimFrame( animate );
 	game.background.draw();
-	game.ship.move();
-	game.ship.bulletPool.animate(); 
-	game.cannon.move();
-	game.cannon.bulletPool.animate();
+	game.sardina.move();
+	game.sardina.bulletPool.animate(); 
+	game.forn.move();
+	game.forn.bulletPool.animate();
 }
 
 
@@ -475,15 +474,6 @@ document.onkeyup = function(e) {
     e.preventDefault();
     KEY_STATUS[KEY_CODES[keyCode]] = false;
   }
-}
-
-/**
-*Sets up the document to listen to mouse click and fire cannon balls
-*
-*/
-
-document.onclick = function(e){
-
 }
 
 /**	
