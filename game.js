@@ -57,7 +57,7 @@ var imageRepository = new function() {
 	// Set images src
 	this.background.src = "imgs/bg.png";
 	this.sardina.src = "imgs/sardina.svg";
-	this.bullet.src = "imgs/bullet.png";
+	this.bullet.src = "imgs/fire.svg";
 	this.forn.src = "imgs/forn.svg";
 }
 
@@ -121,7 +121,6 @@ Background.prototype = new Drawable();
  */
 function Bullet() {	
 	this.alive = false; // Is true if the bullet is currently in use
-	
 	/*
 	 * Sets the bullet values
 	 */
@@ -130,6 +129,11 @@ function Bullet() {
 		this.y = y;
 		this.speed = speed;
 		this.alive = true;
+		this.clippedWidth = 100;
+		this.clippedHeight = 245;
+		this.direction = 0;
+		this.sy = this.clippedHeight;
+		this.goback = false;
 	};
 
 	/*
@@ -140,13 +144,17 @@ function Bullet() {
 	 */
 	this.draw = function() {
 		this.context.clearRect(this.x, this.y, this.width, this.height);
-		this.y -= this.speed;
-		if (this.y <= 0 - this.height) {
-			return true;
+		if (this.sy > 0 && this.goback ==false){
+			this.sy -= this.speed;
 		}
-		else {
-			this.context.drawImage(imageRepository.bullet, this.x, this.y);
+		if (this.sy <= 0 || this.goback==true){
+			this.goback = true;
+			this.sy += this.speed;
 		}
+		
+			//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+			this.context.drawImage(imageRepository.bullet, 100, this.sy, this.clippedWidth, this.clippedHeight, this.x, this.y,100,245);
+		
 	};
 	
 	/*
