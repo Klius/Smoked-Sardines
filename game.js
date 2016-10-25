@@ -1,4 +1,4 @@
- 
+
 /* RESOURCES
  * 1. http://gamedev.tutsplus.com/tutorials/implementation/object-pools-help-you-reduce-lag-in-resource-intensive-games/
  * 2. http://gameprogrammingpatterns.com/object-pool.html
@@ -259,7 +259,7 @@ function Pool(maxSize) {
  * around the screen.
  */
 function Sardina() {
-	this.speed = 3;
+	this.speed = 5;
 	this.bulletPool = new Pool(30);
 	this.bulletPool.init();
 
@@ -283,21 +283,21 @@ function Sardina() {
 			// to have diagonal movement.
 			if (KEY_STATUS.left) {
 				this.x -= this.speed
-				if (this.x <= 0) // Keep player within the screen
-					this.x = 0;
+				if (this.x <= 60) // Keep player within the screen
+					this.x = 60;
 			} else if (KEY_STATUS.right) {
 				this.x += this.speed
-				if (this.x >= this.canvasWidth - this.width)
-					this.x = this.canvasWidth - this.width;
+				if (this.x >= this.canvasWidth - 60 - this.width)
+					this.x = this.canvasWidth - 60 - this.width;
 			} 
 			if (KEY_STATUS.up) {
 				this.y -= this.speed
-				if(this.y <= 0)
-					this.y = 0;
+				if(this.y <= 60)
+					this.y = 60;
 			} else if (KEY_STATUS.down) {
 				this.y += this.speed
-				if (this.y >= this.canvasHeight - this.height)
-					this.y = this.canvasHeight - this.height;
+				if (this.y >= this.canvasHeight - 60 - this.height)
+					this.y = this.canvasHeight - 60 - this.height;
 			}
 			
 			// Finish by redrawing the Sardina
@@ -339,7 +339,7 @@ function Forn() {
 	};
 	
 	/*
-	 * Fires two bullets
+	 * Fires the fire
 	 */
 	this.fire = function() {
 		this.bulletPool.get(this.x, this.y, 3);
@@ -400,8 +400,13 @@ function Game() {
 			this.sardina.init(shipStartX, shipStartY, imageRepository.sardina.width,
 			               imageRepository.sardina.height);
 			//Set the forn to start
-			this.forn = new Forn();
-			this.forn.init(0,0,100,imageRepository.forn.height);
+			this.forns = [];
+			for(var i=0;i<fornCoords.length;i++){
+				var forn = new Forn();
+				forn.init(fornCoords[i].x,fornCoords[i].y,
+							imageRepository.forn.width,imageRepository.forn.height);
+				this.forns.push(forn);
+			}
 			return true;
 		} else {
 			return false;
@@ -411,7 +416,9 @@ function Game() {
 	// Start the animation loop
 	this.start = function() {
 		this.sardina.draw();
-		this.forn.draw();
+		for(var i=0;i<this.forns.length;i++){
+			this.forns[i].draw();
+		}
 		animate();
 	};
 }
@@ -427,9 +434,11 @@ function animate() {
 	requestAnimFrame( animate );
 	game.background.draw();
 	game.sardina.move();
-	game.sardina.bulletPool.animate(); 
-	game.forn.move();
-	game.forn.bulletPool.animate();
+	game.sardina.bulletPool.animate();
+	for(i=0;i<game.forns.length;i++){
+		game.forns[i].move();
+	}
+	//game.forn.bulletPool.animate();
 }
 
 
