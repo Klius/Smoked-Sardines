@@ -69,12 +69,13 @@ var imageRepository = new function() {
  * functions. 
  */
 function Drawable() {
-	this.init = function(x, y, width, height) {
+	this.init = function(x, y, width, height,angle=0) {
 		// Defualt variables
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		this.angle = angle;
 	}
 	
 	this.speed = 0;
@@ -324,18 +325,23 @@ function Forn() {
 	this.speed = 2;
 	this.bulletPool = new Pool(30);
 	this.bulletPool.init();
-
+	
 	var fireRate = 10;
 	var counter = 0;
 	
 	this.draw = function() {
-		this.context.drawImage(imageRepository.forn,0,0,this.width,this.height, this.x, this.y,this.width,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.save();
+		this.context.translate(this.x + 100, this.y + this.height);
+		this.context.rotate(this.angle * Math.PI / 180);
+		this.context.drawImage(imageRepository.forn,0,0, 100,this.height, this.x, this.y,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.restore();
 	};
 	this.move = function() {	
 		counter++;
 		this.fire();
 		// Determine if the action is move action
 		this.draw();
+		
 	};
 	
 	/*
@@ -404,7 +410,7 @@ function Game() {
 			for(var i=0;i<fornCoords.length;i++){
 				var forn = new Forn();
 				forn.init(fornCoords[i].x,fornCoords[i].y,
-							imageRepository.forn.width,imageRepository.forn.height);
+							imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
 				this.forns.push(forn);
 			}
 			return true;
