@@ -6,6 +6,7 @@
  * 4. http://www.kontain.com/fi/entries/94636/ (quote on performace)
  * 5. http://code.bytespider.eu/post/21438674255/dirty-rectangles
  * 6. http://www.html5rocks.com/en/tutorials/canvas/performance/
+ * 7. rotation --> http://stackoverflow.com/questions/17125632/html5-canvas-rotate-object-without-moving-coordinates
  */
 
 	
@@ -31,9 +32,10 @@ var imageRepository = new function() {
 	this.sardina = new Image();
 	this.bullet = new Image();
 	this.forn = new Image();
+	this.corner = new Image();
 	
 	// Ensure all images have loaded before starting the game
-	var numImages = 4;
+	var numImages = 5;
 	var numLoaded = 0;
 	function imageLoaded() {
 		numLoaded++;
@@ -53,8 +55,12 @@ var imageRepository = new function() {
 	this.forn.onload = function(){
 		imageLoaded();
 	}
+	this.corner.onload = function(){
+		imageLoaded();
+	}
 	
 	// Set images src
+	this.corner.src = "imgs/corner.png";
 	this.background.src = "imgs/bg.png";
 	this.sardina.src = "imgs/sardina.svg";
 	this.bullet.src = "imgs/fire.svg";
@@ -318,6 +324,21 @@ function Sardina() {
 Sardina.prototype = new Drawable();
 
 /**
+*
+*Corner Object
+*
+**/
+function Corner() {
+	this.draw = this.draw = function() {
+		this.context.save();
+		this.context.translate(this.x + 100/2 , this.y +this.height/2 );
+		this.context.rotate(this.angle * Math.PI / 180);
+		this.context.drawImage(imageRepository.corner,0,0, 100,this.height, -100 /2, -this.height/2,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.restore();
+	};
+}
+Corner.prototype = new Drawable();
+/**
 *Creates the forn object that will shoot back to the sardina
 *
 */
@@ -331,9 +352,9 @@ function Forn() {
 	
 	this.draw = function() {
 		this.context.save();
-		this.context.translate(this.x + 100, this.y + this.height);
+		this.context.translate(this.x + 100/2 , this.y +this.height/2 );
 		this.context.rotate(this.angle * Math.PI / 180);
-		this.context.drawImage(imageRepository.forn,0,0, 100,this.height, this.x, this.y,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.drawImage(imageRepository.forn,0,0, 100,this.height, -100 /2, -this.height/2,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
 		this.context.restore();
 	};
 	this.move = function() {	
@@ -394,6 +415,10 @@ function Game() {
 			Forn.prototype.context = this.shipContext;
 			Forn.prototype.canvasWidth = this.shipCanvas.width;
 			Forn.prototype.canvasHeight = this.shipCanvas.height;
+			
+			Corner.prototype.context = this.shipContext;
+			Corner.prototype.canvasWidth = this.shipCanvas.width;
+			Corner.prototype.canvasHeight = this.shipCanvas.height;
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
@@ -412,6 +437,12 @@ function Game() {
 				forn.init(fornCoords[i].x,fornCoords[i].y,
 							imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
 				this.forns.push(forn);
+			}
+			for (var i=0; i <cornCoords.length; i++){
+				var corner = new Corner();
+				corner.init(cornCoords[i].x,cornCoords[i].y,
+							imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
+				corner.draw();
 			}
 			return true;
 		} else {
