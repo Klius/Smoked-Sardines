@@ -33,7 +33,7 @@ var imageRepository = new function() {
 	this.bullet = new Image();
 	this.forn = new Image();
 	this.corner = new Image();
-	
+    	
 	// Ensure all images have loaded before starting the game
 	var numImages = 5;
 	var numLoaded = 0;
@@ -65,6 +65,7 @@ var imageRepository = new function() {
 	this.sardina.src = "imgs/sardina.svg";
 	this.bullet.src = "imgs/fire.svg";
 	this.forn.src = "imgs/forn.svg";
+	console.log(this.forn.height);
 }
 
 
