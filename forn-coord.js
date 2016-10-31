@@ -14,7 +14,7 @@ var fornCoords = [
 ];
 var cornCoords = [
 					{"x":0,"y":0,"angle":0},
-					{"x":390,"y":-10,"angle":90},
-					{"x":10,"y":380,"angle":270},
-					{"x":400,"y":400,"angle":0}					
+					{"x":400,"y":0,"angle":90},
+					{"x":0,"y":360,"angle":270},
+					{"x":400,"y":360,"angle":180}					
 ];
