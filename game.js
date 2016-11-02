@@ -260,7 +260,6 @@ function Pool(maxSize) {
 	};
 }
 
-
 /**
  * Create the Sardina object that the player controls. The sardina is
  * drawn on the "sardina" canvas and uses dirty rectangles to move
@@ -339,6 +338,37 @@ function Corner() {
 	};
 }
 Corner.prototype = new Drawable();
+
+/**
+*
+*Forn_Controller
+*
+**/
+function FornController() {
+	this.forns = [];
+	this.fornCap = 4;
+	
+	this.init = function() {
+		//Set the forn to start
+		for(var i=0;i<fornCoords.length;i++){
+			var forn = new Forn();
+			forn.init(fornCoords[i].x,fornCoords[i].y,
+					imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
+			this.forns.push(forn);
+		}
+	};
+	this.update = function(){
+		if (KEY_STATUS.space){
+			this.forn[0].inUse = true
+		}
+		else{
+			this.forn[0].inUse = false
+		}
+		for (var i = 0; i< this.forns.length; i++){
+			this.forns[i].draw()
+		}
+	};
+}
 /**
 *Creates the forn object that will shoot back to the sardina
 *
@@ -347,8 +377,9 @@ function Forn() {
 	this.speed = 2;
 	this.bulletPool = new Pool(30);
 	this.bulletPool.init();
-	
+	this.inUse
 	var fireRate = 10;
+	this.fireDelay = 0;
 	var counter = 0;
 	
 	this.draw = function() {
@@ -424,6 +455,9 @@ function Game() {
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
 			
+			//Initialize the fornController
+			this.forncontroller = new FornController();
+			this.forncontroller.init();
 			// Initialize the sardina object
 			this.sardina = new Sardina();
 			// Set the sardina to start in the middle of the canvas
@@ -431,14 +465,7 @@ function Game() {
 			var shipStartY = this.shipCanvas.height/2;
 			this.sardina.init(shipStartX, shipStartY, imageRepository.sardina.width,
 			               imageRepository.sardina.height);
-			//Set the forn to start
-			this.forns = [];
-			for(var i=0;i<fornCoords.length;i++){
-				var forn = new Forn();
-				forn.init(fornCoords[i].x,fornCoords[i].y,
-							imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
-				this.forns.push(forn);
-			}
+			
 			for (var i=0; i <cornCoords.length; i++){
 				var corner = new Corner();
 				corner.init(cornCoords[i].x,cornCoords[i].y,
@@ -454,9 +481,7 @@ function Game() {
 	// Start the animation loop
 	this.start = function() {
 		this.sardina.draw();
-		for(var i=0;i<this.forns.length;i++){
-			this.forns[i].draw();
-		}
+		this.forncontroller.update();
 		animate();
 	};
 }
@@ -473,9 +498,7 @@ function animate() {
 	game.background.draw();
 	game.sardina.move();
 	game.sardina.bulletPool.animate();
-	for(i=0;i<game.forns.length;i++){
-		game.forns[i].move();
-	}
+	game.fornController.update();
 	//game.forn.bulletPool.animate();
 }
 
