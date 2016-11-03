@@ -359,10 +359,10 @@ function FornController() {
 	};
 	this.update = function(){
 		if (KEY_STATUS.space){
-			this.forn[0].inUse = true
+			this.forns[0].inUse = true
 		}
 		else{
-			this.forn[0].inUse = false
+			this.forns[0].inUse = false
 		}
 		for (var i = 0; i< this.forns.length; i++){
 			this.forns[i].draw()
