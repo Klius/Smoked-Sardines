@@ -359,14 +359,15 @@ function FornController() {
 	};
 	this.update = function(){
 		if (KEY_STATUS.space){
-			this.forns[0].inUse = true
+			this.forns[0].inUse = true;
 		}
 		else{
-			this.forns[0].inUse = false
+			this.forns[0].inUse = false;
 		}
 		for (var i = 0; i< this.forns.length; i++){
-			this.forns[i].draw()
+			this.forns[i].move();
 		}
+		console.log("inUse:"+this.forns[0].inUse+" firelvl:"+this.forns[0].firelvl+" state:"+this.forns[0].state);
 	};
 }
 /**
@@ -377,21 +378,59 @@ function Forn() {
 	this.speed = 2;
 	this.bulletPool = new Pool(30);
 	this.bulletPool.init();
-	this.inUse
-	var fireRate = 10;
-	this.fireDelay = 0;
+	this.inUse = false;
+	this.fireDelay = 60;
+	this.firelvl = 0;
+	this.state = 0;
+	var stateRate = this.fireDelay/3;
 	var counter = 0;
 	
 	this.draw = function() {
 		this.context.save();
 		this.context.translate(this.x + 100/2 , this.y +this.height/2 );
 		this.context.rotate(this.angle * Math.PI / 180);
-		this.context.drawImage(imageRepository.forn,0,0, 100,this.height, -100 /2, -this.height/2,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.drawImage(imageRepository.forn, fornSprite[this.firelvl][this.state].sx,
+								fornSprite[this.firelvl][this.state].sy,
+								100,this.height, -100 /2, -this.height/2,100,this.height);
 		this.context.restore();
 	};
-	this.move = function() {	
-		counter++;
-		this.fire();
+	this.move = function() {
+		if (this.inUse){
+			counter++;
+			if(counter%stateRate === 0){
+				if (this.state+1 == 3 ){
+					this.state = 0;
+					if (this.firelvl+1 != 3){
+						this.firelvl +=1;
+					}
+				}else{
+					this.state += 1;
+				}
+				counter = 0;
+			}
+		}
+		else{
+			counter--;
+			
+			if( (this.state == 0) && (this.firelvl == 0)){
+				counter = 0;
+			}
+			else if(counter === 0){
+				if (this.state == 0){
+					if (this.firelvl-1 >= 0){
+						this.firelvl -= 1;
+						this.state = 2;
+					}
+				}
+				else{
+						this.state -=1;
+				}
+				counter = stateRate;
+			}
+		}
+		
+		//this.fire();
 		// Determine if the action is move action
 		this.draw();
 		
@@ -401,7 +440,7 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
-		this.bulletPool.get(this.x, this.y, 3);
+		//this.bulletPool.get(this.x, this.y, 3);
 	};
 }
 Forn.prototype = new Drawable();
@@ -498,7 +537,7 @@ function animate() {
 	game.background.draw();
 	game.sardina.move();
 	game.sardina.bulletPool.animate();
-	game.fornController.update();
+	game.forncontroller.update();
 	//game.forn.bulletPool.animate();
 }
 
