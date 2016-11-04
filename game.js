@@ -347,7 +347,8 @@ Corner.prototype = new Drawable();
 function FornController() {
 	this.forns = [];
 	this.fornCap = 4;
-	
+	this.toggle = false ;
+	var counter = 0;
 	this.init = function() {
 		//Set the forn to start
 		for(var i=0;i<fornCoords.length;i++){
@@ -357,64 +358,114 @@ function FornController() {
 			this.forns.push(forn);
 		}
 	};
-	this.update = function(){
-		//TOP ROW
-		if (KEY_STATUS.topLeft){
-			this.forns[0].inUse = true;
-		}
-		else{
+	this.deactivateForns = function(){
+		if (this.toogle){
 			this.forns[0].inUse = false;
-		}
-		if (KEY_STATUS.topMiddle){
-			this.forns[1].inUse = true;
-		}
-		else{
 			this.forns[1].inUse = false;
-		}
-		if (KEY_STATUS.topRight){
-			this.forns[2].inUse = true;
-		}
-		else{
 			this.forns[2].inUse = false;
-		}
-		//LEFT ROW
-		if (KEY_STATUS.leftTop){
-			this.forns[3].inUse = true;
+			this.forns[9].inUse = false;
+			this.forns[10].inUse = false;
+			this.forns[11].inUse = false;
 		}
 		else{
 			this.forns[3].inUse = false;
-		}
-		if (KEY_STATUS.leftMiddle){
-			this.forns[4].inUse = true;
-		}
-		else{
 			this.forns[4].inUse = false;
-		}
-		if (KEY_STATUS.leftBottom){
-			this.forns[5].inUse = true;
-		}
-		else{
 			this.forns[5].inUse = false;
+			this.forns[6].inUse = false;
+			this.forns[7].inUse = false;
+			this.forns[8].inUse = false;
 		}
-		//BOTTOM ROW
-		if (KEY_STATUS.bottomLeft){
-			this.forns[9].inUse = true;
+	};
+	this.update = function(){
+		counter--;
+		if (KEY_STATUS.toogle){
+			if (counter <=0){
+				this.toogle = this.toogle ? false : true;
+				console.log(this.toogle);
+				counter = 15;
+			}
 		}
-		else{
-			this.forns[9].inUse = false;
+		if(this.toogle){
+			//LEFT ROW
+			if (KEY_STATUS.topLeft){
+				this.forns[3].inUse = true;
+			}
+			else{
+				this.forns[3].inUse = false;
+			}
+			if (KEY_STATUS.topMiddle){
+				this.forns[4].inUse = true;
+			}
+			else{
+				this.forns[4].inUse = false;
+			}
+			if (KEY_STATUS.topRight){
+				this.forns[5].inUse = true;
+			}
+			else{
+				this.forns[5].inUse = false;
+			}
+			//RIGHT ROW
+			if (KEY_STATUS.bottomLeft){
+				this.forns[6].inUse = true;
+			}
+			else{
+				this.forns[6].inUse = false;
+			}
+			if (KEY_STATUS.bottomMiddle){
+				this.forns[7].inUse = true;
+			}
+			else{
+				this.forns[7].inUse = false;
+			}
+			if (KEY_STATUS.bottomRight){
+				this.forns[8].inUse = true;
+			}
+			else{
+				this.forns[8].inUse = false;
+			}
+		}else{
+			//TOP ROW
+			if (KEY_STATUS.topLeft){
+				this.forns[0].inUse = true;
+			}
+			else{
+				this.forns[0].inUse = false;
+			}
+			if (KEY_STATUS.topMiddle){
+				this.forns[1].inUse = true;
+			}
+			else{
+				this.forns[1].inUse = false;
+			}
+			if (KEY_STATUS.topRight){
+				this.forns[2].inUse = true;
+			}
+			else{
+				this.forns[2].inUse = false;
+			}
+			//BOTTOM ROW
+			if (KEY_STATUS.bottomLeft){
+				this.forns[9].inUse = true;
+			}
+			else{
+				this.forns[9].inUse = false;
+			}
+			if (KEY_STATUS.bottomMiddle){
+				this.forns[10].inUse = true;
+			}
+			else{
+				this.forns[10].inUse = false;
+			}
+			if (KEY_STATUS.bottomRight){
+				this.forns[11].inUse = true;
+			}
+			else{
+				this.forns[11].inUse = false;
+			}
 		}
-		if (KEY_STATUS.bottomMiddle){
-			this.forns[10].inUse = true;
-		}
-		else{
-			this.forns[10].inUse = false;
-		}
-		if (KEY_STATUS.bottomRight){
-			this.forns[11].inUse = true;
-		}
-		else{
-			this.forns[11].inUse = false;
-		}
+		this.deactivateForns();
+		
 		//update forns and draw
 		for (var i = 0; i< this.forns.length; i++){
 			this.forns[i].move();
@@ -481,7 +532,9 @@ function Forn() {
 			}
 		}
 		
-		//this.fire();
+		if (this.firelvl>=1){
+			this.fire();
+		}
 		// Determine if the action is move action
 		this.draw();
 		
@@ -491,6 +544,7 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
+		console.log("FIRE! FIRE FIRE!")
 		//this.bulletPool.get(this.x, this.y, 3);
 	};
 }
@@ -601,18 +655,13 @@ KEY_CODES = {
   38: 'up',
   39: 'right',
   40: 'down',
-  88: 'bottomLeft',
-  67: 'bottomMiddle',
-  86: 'bottomRight',
-  81: 'leftTop',
-  65: 'leftMiddle',
-  90: 'leftBottom',
-  87: 'topLeft',
-  69: 'topMiddle',
-  82: 'topRight',
-  84: 'rightTop',
-  71: 'rightMiddle',
-  66: 'rightBottom'
+  74: 'bottomLeft',
+  75: 'bottomMiddle',
+  76: 'bottomRight',
+  65: 'topLeft',
+  83: 'topMiddle',
+  68: 'topRight',
+  84: 'toogle'
   
 };
 
