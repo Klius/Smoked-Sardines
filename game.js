@@ -544,7 +544,7 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
-		console.log("FIRE! FIRE FIRE!")
+		console.log("FIRE! FIRE FIRE! ")
 		//this.bulletPool.get(this.x, this.y, 3);
 	};
 }
