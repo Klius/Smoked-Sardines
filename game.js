@@ -19,8 +19,10 @@ function init() {
 	if(game.init())
 		game.start();
 }
-
-
+/*
+*Mouse position Variable
+*/
+var mousePos;
 /**
  * Define an object to hold all our images for the game so images
  * are only ever created once. This type of object is known as a 
@@ -65,7 +67,6 @@ var imageRepository = new function() {
 	this.sardina.src = "imgs/sardina.svg";
 	this.bullet.src = "imgs/fire.svg";
 	this.forn.src = "imgs/forn.svg";
-	console.log(this.forn.height);
 }
 
 
@@ -278,7 +279,7 @@ function Sardina() {
 	};
 	this.move = function() {	
 		//counter++;
-		// Determine if the action is move action
+		/* Determine if the action is move action
 		if (KEY_STATUS.left || KEY_STATUS.right ||
 			KEY_STATUS.down || KEY_STATUS.up) {
 			// The sardina moved, so erase it's current image so it can
@@ -306,10 +307,27 @@ function Sardina() {
 				if (this.y >= this.canvasHeight - 60 - this.height)
 					this.y = this.canvasHeight - 60 - this.height;
 			}
-			
+			*/
+			//clear the sardina
+			this.context.clearRect(this.x, this.y, this.width, this.height);
+			//update position
+			this.x = mousePos.x;
+			this.y = mousePos.y;
+			if (this.y >= this.canvasHeight - 60 - this.height){
+					this.y = this.canvasHeight - 60 - this.height;
+			}
+			if(this.y <= 60){
+					this.y = 60;
+			}
+			if (this.x >= this.canvasWidth - 60 - this.width){
+					this.x = this.canvasWidth - 60 - this.width;
+			}
+			if (this.x <= 60){ // Keep player within the screen
+					this.x = 60;
+			}
 			// Finish by redrawing the Sardina
 			this.draw();
-		}
+		//}
 		
 	};
 	
@@ -381,7 +399,7 @@ function FornController() {
 		if (KEY_STATUS.toogle){
 			if (counter <=0){
 				this.toogle = this.toogle ? false : true;
-				console.log(this.toogle);
+				//console.log(this.toogle);
 				counter = 15;
 			}
 		}
@@ -544,7 +562,7 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
-		console.log("FIRE! FIRE FIRE! ")
+		//console.log("FIRE! FIRE FIRE! ")
 		//this.bulletPool.get(this.x, this.y, 3);
 	};
 }
@@ -567,6 +585,12 @@ function Game() {
 		this.shipCanvas = document.getElementById('sardina');
 		this.mainCanvas = document.getElementById('main');
 		
+		this.shipCanvas.addEventListener('mousemove', 
+										function(evt) 
+										{
+											mousePos = getMousePos(document.getElementById('sardina'), evt);
+										},
+										false);
 		// Test to see if canvas is supported. Only need to
 		// check one canvas
 		if (this.bgCanvas.getContext) {
@@ -651,10 +675,10 @@ function animate() {
 // Original code by Doug McInnes
 KEY_CODES = {
   32: 'space',
-  100: 'left',
-  104: 'up',
-  102: 'right',
-  101: 'down',
+  37: 'left',
+  38: 'up',
+  39: 'right',
+  40: 'down',
   74: 'bottomLeft',
   75: 'bottomMiddle',
   76: 'bottomRight',
@@ -701,7 +725,18 @@ document.onkeyup = function(e) {
     KEY_STATUS[KEY_CODES[keyCode]] = false;
   }
 }
-
+/**
+*
+*Reads mouse coordinates and returns them
+*
+**/
+function getMousePos(canvas,evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+			x: Math.round((evt.clientX-rect.left)/(rect.right-rect.left)*canvas.width),
+			y: Math.round((evt.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height)
+        };
+}
 /**	
  * requestAnim shim layer by Paul Irish
  * Finds the first API that works to optimize the animation loop, 
