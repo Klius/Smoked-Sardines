@@ -536,7 +536,7 @@ function Forn() {
 			if( (this.state == 0) && (this.firelvl == 0)){
 				counter = 0;
 			}
-			else if(counter === 0){
+			else if(counter <= 0){
 				if (this.state == 0){
 					if (this.firelvl-1 >= 0){
 						this.firelvl -= 1;
