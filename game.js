@@ -651,10 +651,10 @@ function animate() {
 // Original code by Doug McInnes
 KEY_CODES = {
   32: 'space',
-  37: 'left',
-  38: 'up',
-  39: 'right',
-  40: 'down',
+  100: 'left',
+  104: 'up',
+  102: 'right',
+  101: 'down',
   74: 'bottomLeft',
   75: 'bottomMiddle',
   76: 'bottomRight',
