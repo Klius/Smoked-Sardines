@@ -128,8 +128,9 @@ Background.prototype = new Drawable();
  * Creates the Bullet object which the sardina fires. The bullets are
  * drawn on the "main" canvas.
  */
-function Bullet() {	
+function Fire() {	
 	this.alive = false; // Is true if the bullet is currently in use
+	
 	/*
 	 * Sets the bullet values
 	 */
@@ -146,7 +147,7 @@ function Bullet() {
 	};
 
 	/*
-	 * Uses a "drity rectangle" to erase the bullet and moves it.
+	 * Uses a "dirty rectangle" to erase the bullet and moves it.
 	 * Returns true if the bullet moved off the screen, indicating that
 	 * the bullet is ready to be cleared by the pool, otherwise draws
 	 * the bullet.
@@ -156,8 +157,7 @@ function Bullet() {
 		if (this.sy > 0 && this.goback ==false){
 			this.sy -= this.speed;
 		}
-		if (this.sy <= 0 || this.goback==true){
-			this.goback = true;
+		if (this.goback==true){
 			this.sy += this.speed;
 		}
 		
@@ -176,7 +176,7 @@ function Bullet() {
 		this.alive = false;
 	};
 }
-Bullet.prototype = new Drawable();
+Fire.prototype = new Drawable();
 
 
 /**
@@ -211,10 +211,10 @@ function Pool(maxSize) {
 	this.init = function() {
 		for (var i = 0; i < size; i++) {
 			// Initalize the bullet object
-			var bullet = new Bullet();
-			bullet.init(0,0, imageRepository.bullet.width,
+			var fire = new Fire();
+			fire.init(0,0, imageRepository.bullet.width,
 			            imageRepository.bullet.height);
-			pool[i] = bullet;
+			pool[i] = fire;
 		}
 	};
 	
@@ -394,6 +394,7 @@ function FornController() {
 			this.forns[8].inUse = false;
 		}
 	};
+	
 	this.update = function(){
 		counter--;
 		if (KEY_STATUS.toogle){
@@ -487,6 +488,7 @@ function FornController() {
 		//update forns and draw
 		for (var i = 0; i< this.forns.length; i++){
 			this.forns[i].move();
+			this.forns[i].firePool.animate();
 		}
 		//console.log("inUse:"+this.forns[0].inUse+" firelvl:"+this.forns[0].firelvl+" state:"+this.forns[0].state);
 	};
@@ -497,8 +499,8 @@ function FornController() {
 */
 function Forn() {
 	this.speed = 2;
-	this.bulletPool = new Pool(30);
-	this.bulletPool.init();
+	this.firePool = new Pool(1);
+	this.firePool.init();
 	this.inUse = false;
 	this.fireDelay = 60;
 	this.firelvl = 0;
@@ -562,8 +564,7 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
-		//console.log("FIRE! FIRE FIRE! ")
-		//this.bulletPool.get(this.x, this.y, 3);
+		this.firePool.get(this.x, this.y, 3);
 	};
 }
 Forn.prototype = new Drawable();
@@ -608,9 +609,9 @@ function Game() {
 			Sardina.prototype.canvasWidth = this.shipCanvas.width;
 			Sardina.prototype.canvasHeight = this.shipCanvas.height;
 			
-			Bullet.prototype.context = this.mainContext;
-			Bullet.prototype.canvasWidth = this.mainCanvas.width;
-			Bullet.prototype.canvasHeight = this.mainCanvas.height;
+			Fire.prototype.context = this.mainContext;
+			Fire.prototype.canvasWidth = this.mainCanvas.width;
+			Fire.prototype.canvasHeight = this.mainCanvas.height;
 			
 			Forn.prototype.context = this.shipContext;
 			Forn.prototype.canvasWidth = this.shipCanvas.width;
