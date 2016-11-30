@@ -134,7 +134,7 @@ function Fire() {
 	/*
 	 * Sets the bullet values
 	 */
-	this.spawn = function(x, y, speed) {
+	this.spawn = function(x, y, speed,fireLvl,fireType) {
 		this.x = x;
 		this.y = y;
 		this.speed = speed;
@@ -144,6 +144,9 @@ function Fire() {
 		this.direction = 0;
 		this.sy = this.clippedHeight;
 		this.goback = false;
+		this.fireLvl = fireLvl;
+		this.oldFireLvl = 0;
+		this.fireType = fireType;
 	};
 
 	/*
@@ -154,16 +157,50 @@ function Fire() {
 	 */
 	this.draw = function() {
 		this.context.clearRect(this.x, this.y, this.width, this.height);
-		if (this.sy > 0 && this.goback ==false){
-			this.sy -= this.speed;
+		console.log("x:"+this.x+" y:"+this.y);
+		if (this.goback){
+			//pull the fire back
+			this.deanimateFire();
+			//if the older lvl is lower show
+			if (this.oldFireLvl < this.fireLvl ){
+				this.goback = false;
+			}
+			
 		}
-		if (this.goback==true){
-			this.sy += this.speed;
+		else{
+			//if the older lvl is bigger hide
+			if (this.oldFireLvl > this.fireLvl ){
+				this.goback = true;
+			}
+			//put the fire on
+			this.animateFire();
+			
 		}
+
+		//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.drawImage(imageRepository.bullet, 100, this.sy, this.clippedWidth, this.clippedHeight, this.x, this.y,100,245);
 		
-			//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
-			this.context.drawImage(imageRepository.bullet, 100, this.sy, this.clippedWidth, this.clippedHeight, this.x, this.y,100,245);
-		
+	};
+	
+	this.deanimateFire = function(){
+		if (this.fireType == 0){
+			if ( this.sy < this.clippedHeight){
+				this.sy += this.speed;
+			}
+			//clear the fire if it's offscreen
+			if (this.sy >= this.clippedHeight){
+				this.clear();
+			}
+		}
+	};
+	this.animateFire = function(){
+		if (this.fireType == 0){
+			if (this.sy > 0 ){
+				this.sy -= this.speed;
+			}
+		}else{
+			this.clear();
+		}
 	};
 	
 	/*
@@ -174,6 +211,8 @@ function Fire() {
 		this.y = 0;
 		this.speed = 0;
 		this.alive = false;
+		this.fireLvl = 0;
+		this.oldFireLvl = 0;
 	};
 }
 Fire.prototype = new Drawable();
@@ -204,7 +243,6 @@ Fire.prototype = new Drawable();
 function Pool(maxSize) {
 	var size = maxSize; // Max bullets allowed in the pool
 	var pool = [];
-	
 	/*
 	 * Populates the pool array with Bullet objects
 	 */
@@ -222,13 +260,21 @@ function Pool(maxSize) {
 	 * Grabs the last item in the list and initializes it and
 	 * pushes it to the front of the array.
 	 */
-	this.get = function(x, y, speed) {
+	this.get = function(x, y, speed, fireLvl, fireType) {
 		if(!pool[size - 1].alive) {
-			pool[size - 1].spawn(x, y, speed);
+			pool[size - 1].spawn(x, y, speed, fireLvl, fireType);
 			pool.unshift(pool.pop());
 		}
+		else{
+			pool[size-1].oldFireLvl = pool[size-1].fireLvl;
+			pool[size-1].fireLvl = fireLvl;
+		}
 	};
-	
+	this.cancel = function(){
+		if(pool[size - 1].alive){
+			pool[size-1].fireLvl = 0;
+		}
+	};
 	/*
 	 * Used for the sardina to be able to get two bullets at once. If
 	 * only the get() function is used twice, the sardina is able to
@@ -279,35 +325,7 @@ function Sardina() {
 	};
 	this.move = function() {	
 		//counter++;
-		/* Determine if the action is move action
-		if (KEY_STATUS.left || KEY_STATUS.right ||
-			KEY_STATUS.down || KEY_STATUS.up) {
-			// The sardina moved, so erase it's current image so it can
-			// be redrawn in it's new location
-			this.context.clearRect(this.x, this.y, this.width, this.height);
-			
-			// Update x and y according to the direction to move and
-			// redraw the Sardina. Change the else if's to if statements
-			// to have diagonal movement.
-			if (KEY_STATUS.left) {
-				this.x -= this.speed
-				if (this.x <= 60) // Keep player within the screen
-					this.x = 60;
-			} else if (KEY_STATUS.right) {
-				this.x += this.speed
-				if (this.x >= this.canvasWidth - 60 - this.width)
-					this.x = this.canvasWidth - 60 - this.width;
-			} 
-			if (KEY_STATUS.up) {
-				this.y -= this.speed
-				if(this.y <= 60)
-					this.y = 60;
-			} else if (KEY_STATUS.down) {
-				this.y += this.speed
-				if (this.y >= this.canvasHeight - 60 - this.height)
-					this.y = this.canvasHeight - 60 - this.height;
-			}
-			*/
+		
 			//clear the sardina
 			this.context.clearRect(this.x, this.y, this.width, this.height);
 			//update position
@@ -373,6 +391,7 @@ function FornController() {
 			var forn = new Forn();
 			forn.init(fornCoords[i].x,fornCoords[i].y,
 					imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
+			forn.fireType = fornCoords[i].fireType;
 			this.forns.push(forn);
 		}
 	};
@@ -502,6 +521,7 @@ function Forn() {
 	this.firePool = new Pool(1);
 	this.firePool.init();
 	this.inUse = false;
+	this.fireType = 0;
 	this.fireDelay = 60;
 	this.firelvl = 0;
 	this.state = 0;
@@ -552,8 +572,11 @@ function Forn() {
 			}
 		}
 		
-		if (this.firelvl>=1){
+		if (this.firelvl >= 1 ){
 			this.fire();
+		}
+		else{
+			this.firePool.cancel();
 		}
 		// Determine if the action is move action
 		this.draw();
@@ -564,7 +587,7 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
-		this.firePool.get(this.x, this.y, 3);
+		this.firePool.get(this.x, this.y, 3,this.firelvl,this.fireType);//add firetype and lvl
 	};
 }
 Forn.prototype = new Drawable();

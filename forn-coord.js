@@ -1,16 +1,16 @@
 var fornCoords = [
-					{"x":100,"y":0,"angle":0},
-					{"x":200,"y":0,"angle":0},
-					{"x":300,"y":0,"angle":0},
-					{"x":-20,"y":100,"angle":270},
-					{"x":-20,"y":200,"angle":270},
-					{"x":-20,"y":300,"angle":270},
-					{"x":420,"y":100,"angle":90},
-					{"x":420,"y":200,"angle":90},
-					{"x":420,"y":300,"angle":90},
-					{"x":100,"y":400,"angle":180},
-					{"x":200,"y":400,"angle":180},
-					{"x":300,"y":400,"angle":180}
+					{"x":100,"y":0,"angle":0,"fireType":0},
+					{"x":200,"y":0,"angle":0,"fireType":0},
+					{"x":300,"y":0,"angle":0,"fireType":0},
+					{"x":-20,"y":100,"angle":270,"fireType":3},
+					{"x":-20,"y":200,"angle":270,"fireType":3},
+					{"x":-20,"y":300,"angle":270,"fireType":3},
+					{"x":420,"y":100,"angle":90,"fireType":2},
+					{"x":420,"y":200,"angle":90,"fireType":2},
+					{"x":420,"y":300,"angle":90,"fireType":2},
+					{"x":100,"y":400,"angle":180,"fireType":1},
+					{"x":200,"y":400,"angle":180,"fireType":1},
+					{"x":300,"y":400,"angle":180,"fireType":1}
 ];
 var cornCoords = [
 					{"x":0,"y":0,"angle":0},
