@@ -99,9 +99,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="63.74023"
-     inkscape:cy="77.416671"
+     inkscape:zoom="1.4"
+     inkscape:cx="38.481964"
+     inkscape:cy="129.80413"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -183,7 +183,7 @@
          sodipodi:role="line"
          x="654.58276"
          y="841.37189"
-         id="tspan4146-9">Right</tspan></text>
+         id="tspan4146-9">Left</tspan></text>
     <rect
        style="fill:url(#radialGradient4148-4-0);fill-opacity:1;stroke:none;stroke-width:3.52399993;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect4138-2-9"
@@ -203,6 +203,6 @@
          sodipodi:role="line"
          x="652.5285"
          y="444.91489"
-         id="tspan4268">Left</tspan></text>
+         id="tspan4268">Right</tspan></text>
   </g>
 </svg>

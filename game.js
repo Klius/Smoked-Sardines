@@ -65,7 +65,7 @@ var imageRepository = new function() {
 	this.corner.src = "imgs/corner.png";
 	this.background.src = "imgs/bg.png";
 	this.sardina.src = "imgs/sardina.svg";
-	this.bullet.src = "imgs/fire.svg";
+	this.bullet.src = "imgs/fire.png";
 	this.forn.src = "imgs/forn.svg";
 }
 
@@ -139,10 +139,7 @@ function Fire() {
 		this.y = y;
 		this.speed = speed;
 		this.alive = true;
-		this.clippedWidth = 100;
-		this.clippedHeight = 245;
 		this.direction = 0;
-		this.sy = this.clippedHeight;
 		this.goback = false;
 		this.fireLvl = fireLvl;
 		this.oldFireLvl = 0;
@@ -154,10 +151,12 @@ function Fire() {
 	 * Returns true if the bullet moved off the screen, indicating that
 	 * the bullet is ready to be cleared by the pool, otherwise draws
 	 * the bullet.
+	 *
+	 * TODO: Fix dirty bug that reduces the nest to another fire
 	 */
 	this.draw = function() {
+		
 		this.context.clearRect(this.x, this.y, this.width, this.height);
-		console.log("x:"+this.x+" y:"+this.y);
 		if (this.goback){
 			//pull the fire back
 			this.deanimateFire();
@@ -174,31 +173,70 @@ function Fire() {
 			}
 			//put the fire on
 			this.animateFire();
-			
+				
 		}
-
-		//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
-		this.context.drawImage(imageRepository.bullet, 100, this.sy, this.clippedWidth, this.clippedHeight, this.x, this.y,100,245);
-		
+		if(this.alive){
+			//console.log("x:"+this.x+" y:"+this.y);
+			this.context.save();
+			this.context.translate(this.x + this.width/2 , this.y +this.height/2 );
+			this.context.rotate(this.angle * Math.PI / 180);
+			//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+			this.context.drawImage(imageRepository.bullet, 
+									0/*sx*/, 0/*sy*/, this.width, this.height,
+									-this.width/2, -this.height/2,this.width, this.height
+									);
+			this.context.restore();
+		}
 	};
 	
+	/*
+	*  Animations for hiding the fire
+	*/
 	this.deanimateFire = function(){
+		//top to bottom animation
 		if (this.fireType == 0){
-			if ( this.sy < this.clippedHeight){
-				this.sy += this.speed;
+			if ( this.y > -this.height-imageRepository.forn.height){
+				this.y -= this.speed;
 			}
 			//clear the fire if it's offscreen
-			if (this.sy >= this.clippedHeight){
+			if (this.y <= -this.height){
 				this.clear();
 			}
 		}
-	};
-	this.animateFire = function(){
-		if (this.fireType == 0){
-			if (this.sy > 0 ){
-				this.sy -= this.speed;
+		//bottom to top animation
+		else if(this.fireType == 1){
+			if (this.y < this.context.canvas.height){
+				this.y += this.speed;
 			}
-		}else{
+			if(this.y >=this.context.canvas.height){
+				this.clear();
+			}
+		}
+		else if(this.fireType == 2){}
+		else if(this.fireType == 3){}
+	};
+	
+	/*
+	*	Animations for showing the fire
+	*/
+	this.animateFire = function(){
+		//top to bottom animation
+		if (this.fireType == 0){
+			if (this.y < imageRepository.forn.height){
+				this.y += this.speed;
+			}
+		}
+		//bottom to top animation
+		else if(this.fireType == 1){
+			if (this.y >this.context.canvas.height-imageRepository.forn.height-this.height){
+				this.y -= this.speed;
+			}
+		}
+		else if(this.fireType == 2){
+			this.x -= this.speed;
+		}
+		else if(this.fireType == 3){}
+		else{
 			this.clear();
 		}
 	};
@@ -246,12 +284,12 @@ function Pool(maxSize) {
 	/*
 	 * Populates the pool array with Bullet objects
 	 */
-	this.init = function() {
+	this.init = function(fireType) {
 		for (var i = 0; i < size; i++) {
 			// Initalize the bullet object
 			var fire = new Fire();
 			fire.init(0,0, imageRepository.bullet.width,
-			            imageRepository.bullet.height);
+			            imageRepository.bullet.height,fireAngle[fireType]);
 			pool[i] = fire;
 		}
 	};
@@ -392,6 +430,7 @@ function FornController() {
 			forn.init(fornCoords[i].x,fornCoords[i].y,
 					imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
 			forn.fireType = fornCoords[i].fireType;
+			forn.initPool();
 			this.forns.push(forn);
 		}
 	};
@@ -519,7 +558,6 @@ function FornController() {
 function Forn() {
 	this.speed = 2;
 	this.firePool = new Pool(1);
-	this.firePool.init();
 	this.inUse = false;
 	this.fireType = 0;
 	this.fireDelay = 60;
@@ -527,6 +565,10 @@ function Forn() {
 	this.state = 0;
 	var stateRate = this.fireDelay/3;
 	var counter = 0;
+	
+	this.initPool = function(){
+		this.firePool.init(this.fireType);
+	};
 	
 	this.draw = function() {
 		this.context.save();
@@ -587,7 +629,16 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
-		this.firePool.get(this.x, this.y, 3,this.firelvl,this.fireType);//add firetype and lvl
+		if (this.fireType == 0){
+			this.firePool.get(this.x, this.height-imageRepository.bullet.height, 3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		else if (this.fireType == 1){
+			this.firePool.get(this.x, this.y+this.height/*100,100*/, 3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		else if (this.fireType == 2){
+			this.firePool.get(this.x+imageRepository.bullet.height, this.y/*100,100*/, 3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		console.log(this.x+" Y: "+this.y);
 	};
 }
 Forn.prototype = new Drawable();
