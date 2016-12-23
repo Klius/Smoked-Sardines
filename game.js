@@ -130,13 +130,15 @@ Background.prototype = new Drawable();
  */
 function Fire() {	
 	this.alive = false; // Is true if the bullet is currently in use
-	
+	var counter = 0;
+	var frame = 0;
 	/*
 	 * Sets the bullet values
 	 */
 	this.spawn = function(x, y, speed,fireLvl,fireType) {
 		this.x = x;
 		this.y = y;
+		this.width = 100;
 		this.speed = speed;
 		this.alive = true;
 		this.direction = 0;
@@ -144,6 +146,8 @@ function Fire() {
 		this.fireLvl = fireLvl;
 		this.oldFireLvl = 0;
 		this.fireType = fireType;
+		counter = 0;
+		frame = 0;
 	};
 
 	/*
@@ -155,7 +159,6 @@ function Fire() {
 	 * TODO: Fix dirty bug that reduces the nest to another fire
 	 */
 	this.draw = function() {
-		
 		this.context.clearRect(this.x, this.y, this.width, this.height);
 		if (this.goback){
 			//pull the fire back
@@ -176,16 +179,22 @@ function Fire() {
 				
 		}
 		if(this.alive){
-			//console.log("x:"+this.x+" y:"+this.y);
+			console.log("x:"+this.x+" y:"+this.y+" counter:"+counter);
 			this.context.save();
 			this.context.translate(this.x + this.width/2 , this.y +this.height/2 );
 			this.context.rotate(this.angle * Math.PI / 180);
 			//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
 			this.context.drawImage(imageRepository.bullet, 
-									0/*sx*/, 0/*sy*/, this.width, this.height,
+									fireSprite[frame].sx/*sx*/, fireSprite[frame].sy/*sy*/, this.width, this.height,
 									-this.width/2, -this.height/2,this.width, this.height
 									);
 			this.context.restore();
+			counter += 1;
+			if(counter%10 == 0)
+			{
+				frame += 1;
+				if(frame>=fireSprite.length){frame=0;}
+			}
 		}
 	};
 	
