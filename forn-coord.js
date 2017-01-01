@@ -35,7 +35,7 @@ var fornSprite = [
 				{"sx":800, "sy":0}
 			]
 ];
-var fireAngle = [180,0,90,270];
+var fireAngle = [180,0,270,90];
 var fireSprite = [
 					{"sx":0,"sy":0},
 					{"sx":100,"sy":0},

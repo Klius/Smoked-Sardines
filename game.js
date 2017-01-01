@@ -1,5 +1,8 @@
 
-/* RESOURCES
+/** RESOURCES
+ *
+ * BASED OF --> http://blog.sklambert.com/html5-canvas-game-html5-audio-and-finishing-touches/
+ *
  * 1. http://gamedev.tutsplus.com/tutorials/implementation/object-pools-help-you-reduce-lag-in-resource-intensive-games/
  * 2. http://gameprogrammingpatterns.com/object-pool.html
  * 3. http://www.slideshare.net/ernesto.jimenez/5-tips-for-your-html5-games
@@ -7,7 +10,7 @@
  * 5. http://code.bytespider.eu/post/21438674255/dirty-rectangles
  * 6. http://www.html5rocks.com/en/tutorials/canvas/performance/
  * 7. rotation --> http://stackoverflow.com/questions/17125632/html5-canvas-rotate-object-without-moving-coordinates
- */
+ **/
 
 	
 /**
@@ -16,8 +19,9 @@
 var game = new Game();
 
 function init() {
-	if(game.init())
-		game.start();
+	//if(
+	game.init()//)
+		//game.start();
 }
 /*
 *Mouse position Variable
@@ -159,7 +163,8 @@ function Fire() {
 	 * TODO: Fix dirty bug that reduces the nest to another fire
 	 */
 	this.draw = function() {
-		this.context.clearRect(this.x, this.y, this.width, this.height);
+		//this.context.clearRect(this.x, this.y, this.width, this.height);
+		//console.log("x: "+this.x+"y: "+this.y+" height:"+this.height+" width:"+this.width);
 		if (this.goback){
 			//pull the fire back
 			this.deanimateFire();
@@ -179,7 +184,7 @@ function Fire() {
 				
 		}
 		if(this.alive){
-			console.log("x:"+this.x+" y:"+this.y+" counter:"+counter);
+			//console.log("x:"+this.x+" y:"+this.y+" counter:"+counter);
 			this.context.save();
 			this.context.translate(this.x + this.width/2 , this.y +this.height/2 );
 			this.context.rotate(this.angle * Math.PI / 180);
@@ -221,8 +226,23 @@ function Fire() {
 				this.clear();
 			}
 		}
-		else if(this.fireType == 2){}
-		else if(this.fireType == 3){}
+		else if(this.fireType == 2){
+			if(this.x < this.context.canvas.width){
+				this.x += this.speed;
+			}
+			if(this.x >=this.context.canvas.width){
+				this.clear();
+			}
+		}
+		else if(this.fireType == 3){
+			if ( this.x > -this.height-imageRepository.forn.height){
+				this.x -= this.speed;
+			}
+			//clear the fire if it's offscreen
+			if (this.x <= -this.height){
+				this.clear();
+			}
+		}
 	};
 	
 	/*
@@ -242,11 +262,15 @@ function Fire() {
 			}
 		}
 		else if(this.fireType == 2){
-			this.x -= this.speed;
+			if(this.x > this.context.canvas.width - this.height - (imageRepository.forn.height/3)){
+				this.x -= this.speed;
+				//height:170 canvas width:500 Forn Height:60
+			}
 		}
-		else if(this.fireType == 3){}
-		else{
-			this.clear();
+		else if(this.fireType == 3){
+			if (this.x < 95){
+				this.x += this.speed;
+			}
 		}
 	};
 	
@@ -645,7 +669,11 @@ function Forn() {
 			this.firePool.get(this.x, this.y+this.height/*100,100*/, 3,this.firelvl,this.fireType);//add firetype and lvl
 		}
 		else if (this.fireType == 2){
-			this.firePool.get(this.x+imageRepository.bullet.height, this.y/*100,100*/, 3,this.firelvl,this.fireType);//add firetype and lvl
+			this.firePool.get(this.x+imageRepository.bullet.height, this.y-54/*100,100*/, 3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		else if (this.fireType == 3){
+			this.firePool.get(this.x-imageRepository.bullet.height, this.y-54, 
+								3,this.firelvl,this.fireType);//add firetype and lvl
 		}
 		console.log(this.x+" Y: "+this.y);
 	};
@@ -668,7 +696,8 @@ function Game() {
 		this.bgCanvas = document.getElementById('background');
 		this.shipCanvas = document.getElementById('sardina');
 		this.mainCanvas = document.getElementById('main');
-		
+		this.fireCanvas = document.getElementById('faia');
+		//map mouse to move sardina
 		this.shipCanvas.addEventListener('mousemove', 
 										function(evt) 
 										{
@@ -681,7 +710,8 @@ function Game() {
 			this.bgContext = this.bgCanvas.getContext('2d');
 			this.shipContext = this.shipCanvas.getContext('2d');
 			this.mainContext = this.mainCanvas.getContext('2d');
-		
+			this.fireContext = this.fireCanvas.getContext('2d');
+			
 			// Initialize objects to contain their context and canvas
 			// information
 			Background.prototype.context = this.bgContext;
@@ -692,17 +722,17 @@ function Game() {
 			Sardina.prototype.canvasWidth = this.shipCanvas.width;
 			Sardina.prototype.canvasHeight = this.shipCanvas.height;
 			
-			Fire.prototype.context = this.mainContext;
-			Fire.prototype.canvasWidth = this.mainCanvas.width;
-			Fire.prototype.canvasHeight = this.mainCanvas.height;
+			Fire.prototype.context = this.fireContext;
+			Fire.prototype.canvasWidth = this.fireCanvas.width;
+			Fire.prototype.canvasHeight = this.fireCanvas.height;
 			
-			Forn.prototype.context = this.shipContext;
-			Forn.prototype.canvasWidth = this.shipCanvas.width;
-			Forn.prototype.canvasHeight = this.shipCanvas.height;
+			Forn.prototype.context = this.mainContext;
+			Forn.prototype.canvasWidth = this.mainCanvas.width;
+			Forn.prototype.canvasHeight = this.mainCanvas.height;
 			
-			Corner.prototype.context = this.shipContext;
-			Corner.prototype.canvasWidth = this.shipCanvas.width;
-			Corner.prototype.canvasHeight = this.shipCanvas.height;
+			Corner.prototype.context = this.mainContext;
+			Corner.prototype.canvasWidth = this.mainCanvas.width;
+			Corner.prototype.canvasHeight = this.mainCanvas.height;
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
@@ -724,6 +754,16 @@ function Game() {
 							imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
 				corner.draw();
 			}
+			
+			//AUDIO
+			this.backgroundAudio = new Audio("sounds/loop-1.ogg");
+			this.backgroundAudio.loop = true;
+			this.backgroundAudio.volume = .25;
+			this.backgroundAudio.load();
+			
+			//check if audio is loaded
+			this.checkAudio = window.setInterval(function(){checkReadyState()},1000);
+			
 			return true;
 		} else {
 			return false;
@@ -733,9 +773,20 @@ function Game() {
 	// Start the animation loop
 	this.start = function() {
 		this.sardina.draw();
+		this.backgroundAudio.play();
 		this.forncontroller.update();
 		animate();
 	};
+}
+
+/**
+ * Ensure the game sound has loaded before starting the game
+ */
+function checkReadyState() {
+	if ( game.backgroundAudio.readyState === 4) {
+		window.clearInterval(game.checkAudio);
+		game.start();
+	}
 }
 
 
@@ -750,6 +801,8 @@ function animate() {
 	game.background.draw();
 	game.sardina.move();
 	game.sardina.bulletPool.animate();
+	// Clear the fire canvas and redraw!
+	game.fireContext.clearRect(0, 0, game.fireCanvas.width, game.fireCanvas.height);
 	game.forncontroller.update();
 	//game.forn.bulletPool.animate();
 }
