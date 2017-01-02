@@ -11,30 +11,37 @@
 				top: 0px;
 				left: 0px;
 				background: transparent;
+				cursor: none
 			}
 			#background {
 				z-index: -2;
 			}
-			#main {
+			#faia{
 				z-index: -1;
 			}
-			#ship {
+			#main {
 				z-index: 0;
+			}
+			#ship {
+				z-index: 1;
 			}
 		</style>
 	</head>
 	<body>
 		<div>
 		<!-- The canvas for the panning background -->
-		<canvas id="background" width="500" height="500">
+		<canvas id="background" width="500" height="460">
 			Your browser does not support canvas. Please try again with a different browser.
 		</canvas>
-		<!-- The canvas for all enemy ships and bullets -->
-		<canvas id="main" width="500" height="500">
+		<!-- The canvas for Forns -->
+		<canvas id="main" width="500" height="460">
+		</canvas>
+		<!-- -->
+		<canvas id="faia" width="500" height="460">
 		</canvas>
 		<!-- The canvas the ship uses (can only move up
          one forth the screen.) -->
-		<canvas id="sardina" width="500" height="500">
+		<canvas id="sardina" width="500" height="460">
 		</canvas>
 		</div>
 		<script src="forn-coord.js"></script>

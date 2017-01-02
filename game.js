@@ -1,5 +1,8 @@
 
-/* RESOURCES
+/** RESOURCES
+ *
+ * BASED OF --> http://blog.sklambert.com/html5-canvas-game-html5-audio-and-finishing-touches/
+ *
  * 1. http://gamedev.tutsplus.com/tutorials/implementation/object-pools-help-you-reduce-lag-in-resource-intensive-games/
  * 2. http://gameprogrammingpatterns.com/object-pool.html
  * 3. http://www.slideshare.net/ernesto.jimenez/5-tips-for-your-html5-games
@@ -7,7 +10,7 @@
  * 5. http://code.bytespider.eu/post/21438674255/dirty-rectangles
  * 6. http://www.html5rocks.com/en/tutorials/canvas/performance/
  * 7. rotation --> http://stackoverflow.com/questions/17125632/html5-canvas-rotate-object-without-moving-coordinates
- */
+ **/
 
 	
 /**
@@ -16,10 +19,186 @@
 var game = new Game();
 
 function init() {
-	if(game.init())
-		game.start();
+	//if(
+	game.init()//)
+		//game.start();
 }
+/*
+*Mouse position Variable
+*/
+var mousePos;
 
+/**
+ * QuadTree object.
+ *
+ * The quadrant indexes are numbered as below:
+ *     |
+ *  1  |  0
+ * —-+—-
+ *  2  |  3
+ *     |
+ */
+function QuadTree(boundBox, lvl) {
+	var maxObjects = 10;
+	this.bounds = boundBox || {
+		x: 0,
+		y: 0,
+		width: 0,
+		height: 0
+	};
+	var objects = [];
+	this.nodes = [];
+	var level = lvl || 0;
+	var maxLevels = 5;
+	/*
+	 * Clears the quadTree and all nodes of objects
+	 */
+	this.clear = function() {
+		objects = [];
+		for (var i = 0; i < this.nodes.length; i++) {
+			this.nodes[i].clear();
+		}
+		this.nodes = [];
+	};
+	/*
+	 * Get all objects in the quadTree
+	 */
+	this.getAllObjects = function(returnedObjects) {
+		for (var i = 0; i < this.nodes.length; i++) {
+			this.nodes[i].getAllObjects(returnedObjects);
+		}
+		for (var i = 0, len = objects.length; i < len; i++) {
+			returnedObjects.push(objects[i]);
+		}
+		return returnedObjects;
+	};
+	/*
+	 * Return all objects that the object could collide with
+	 */
+	this.findObjects = function(returnedObjects, obj) {
+		if (typeof obj === "undefined") {
+			console.log("UNDEFINED OBJECT");
+			return;
+		}
+		var index = this.getIndex(obj);
+		if (index != -1 && this.nodes.length) {
+			this.nodes[index].findObjects(returnedObjects, obj);
+		}
+		for (var i = 0, len = objects.length; i < len; i++) {
+			returnedObjects.push(objects[i]);
+		}
+		return returnedObjects;
+	};
+	/*
+	 * Insert the object into the quadTree. If the tree
+	 * excedes the capacity, it will split and add all
+	 * objects to their corresponding nodes.
+	 */
+	this.insert = function(obj) {
+		if (typeof obj === "undefined") {
+			return;
+		}
+		if (obj instanceof Array) {
+			for (var i = 0, len = obj.length; i < len; i++) {
+				this.insert(obj[i]);
+			}
+			return;
+		}
+		if (this.nodes.length) {
+			var index = this.getIndex(obj);
+			// Only add the object to a subnode if it can fit completely
+			// within one
+			if (index != -1) {
+				this.nodes[index].insert(obj);
+				return;
+			}
+		}
+		objects.push(obj);
+		// Prevent infinite splitting
+		if (objects.length > maxObjects && level < maxLevels) {
+			if (this.nodes[0] == null) {
+				this.split();
+			}
+			var i = 0;
+			while (i < objects.length) {
+				var index = this.getIndex(objects[i]);
+				if (index != -1) {
+					this.nodes[index].insert((objects.splice(i,1))[0]);
+				}
+				else {
+					i++;
+				}
+			}
+		}
+	};
+	/*
+	 * Determine which node the object belongs to. -1 means
+	 * object cannot completely fit within a node and is part
+	 * of the current node
+	 */
+	this.getIndex = function(obj) {
+		var index = -1;
+		var verticalMidpoint = this.bounds.x + this.bounds.width / 2;
+		var horizontalMidpoint = this.bounds.y + this.bounds.height / 2;
+		// Object can fit completely within the top quadrant
+		var topQuadrant = (obj.y < horizontalMidpoint && obj.y + obj.height < horizontalMidpoint);
+		// Object can fit completely within the bottom quandrant
+		var bottomQuadrant = (obj.y > horizontalMidpoint);
+		// Object can fit completely within the left quadrants
+		if (obj.x < verticalMidpoint &&
+				obj.x + obj.width < verticalMidpoint) {
+			if (topQuadrant) {
+				index = 1;
+			}
+			else if (bottomQuadrant) {
+				index = 2;
+			}
+		}
+		// Object can fix completely within the right quandrants
+		else if (obj.x > verticalMidpoint) {
+			if (topQuadrant) {
+				index = 0;
+			}
+			else if (bottomQuadrant) {
+				index = 3;
+			}
+		}
+		return index;
+	};
+	/*
+	 * Splits the node into 4 subnodes
+	 */
+	this.split = function() {
+		// Bitwise or [html5rocks]
+		var subWidth = (this.bounds.width / 2) | 0;
+		var subHeight = (this.bounds.height / 2) | 0;
+
+		this.nodes[0] = new QuadTree({
+			x: this.bounds.x + subWidth,
+			y: this.bounds.y,
+			width: subWidth,
+			height: subHeight
+		}, level+1);
+		this.nodes[1] = new QuadTree({
+			x: this.bounds.x,
+			y: this.bounds.y,
+			width: subWidth,
+			height: subHeight
+		}, level+1);
+		this.nodes[2] = new QuadTree({
+			x: this.bounds.x,
+			y: this.bounds.y + subHeight,
+			width: subWidth,
+			height: subHeight
+		}, level+1);
+		this.nodes[3] = new QuadTree({
+			x: this.bounds.x + subWidth,
+			y: this.bounds.y + subHeight,
+			width: subWidth,
+			height: subHeight
+		}, level+1);
+	};
+}
 
 /**
  * Define an object to hold all our images for the game so images
@@ -33,7 +212,7 @@ var imageRepository = new function() {
 	this.bullet = new Image();
 	this.forn = new Image();
 	this.corner = new Image();
-	
+    	
 	// Ensure all images have loaded before starting the game
 	var numImages = 5;
 	var numLoaded = 0;
@@ -63,7 +242,7 @@ var imageRepository = new function() {
 	this.corner.src = "imgs/corner.png";
 	this.background.src = "imgs/bg.png";
 	this.sardina.src = "imgs/sardina.svg";
-	this.bullet.src = "imgs/fire.svg";
+	this.bullet.src = "imgs/fire.png";
 	this.forn.src = "imgs/forn.svg";
 }
 
@@ -87,11 +266,17 @@ function Drawable() {
 	this.speed = 0;
 	this.canvasWidth = 0;
 	this.canvasHeight = 0;
+	this.collidableWith = "";
+	this.isColliding = false;
+	this.type = "";
 	
 	// Define abstract function to be implemented in child objects
 	this.draw = function() {
 	};
 	this.move = function() {
+	};
+	this.isCollidableWith = function(object) {
+		return (this.collidableWith === object.type);
 	};
 }
 
@@ -126,42 +311,149 @@ Background.prototype = new Drawable();
  * Creates the Bullet object which the sardina fires. The bullets are
  * drawn on the "main" canvas.
  */
-function Bullet() {	
+function Fire() {	
 	this.alive = false; // Is true if the bullet is currently in use
+	var counter = 0;
+	var frame = 0;
 	/*
 	 * Sets the bullet values
 	 */
-	this.spawn = function(x, y, speed) {
+	this.spawn = function(x, y, speed,fireLvl,fireType) {
 		this.x = x;
 		this.y = y;
+		this.width = 100;
 		this.speed = speed;
 		this.alive = true;
-		this.clippedWidth = 100;
-		this.clippedHeight = 245;
 		this.direction = 0;
-		this.sy = this.clippedHeight;
 		this.goback = false;
+		this.fireLvl = fireLvl;
+		this.oldFireLvl = 0;
+		this.fireType = fireType;
+		counter = 0;
+		frame = 0;
 	};
 
 	/*
-	 * Uses a "drity rectangle" to erase the bullet and moves it.
+	 * Uses a "dirty rectangle" to erase the bullet and moves it.
 	 * Returns true if the bullet moved off the screen, indicating that
 	 * the bullet is ready to be cleared by the pool, otherwise draws
 	 * the bullet.
+	 *
+	 * TODO: Fix dirty bug that reduces the nest to another fire
 	 */
 	this.draw = function() {
-		this.context.clearRect(this.x, this.y, this.width, this.height);
-		if (this.sy > 0 && this.goback ==false){
-			this.sy -= this.speed;
+		if(this.isColliding){
+			//it is colliding supposedly
 		}
-		if (this.sy <= 0 || this.goback==true){
-			this.goback = true;
-			this.sy += this.speed;
+		//this.context.clearRect(this.x, this.y, this.width, this.height);
+		//console.log("x: "+this.x+"y: "+this.y+" height:"+this.height+" width:"+this.width);
+		if (this.goback){
+			//pull the fire back
+			this.deanimateFire();
+			//if the older lvl is lower show
+			if (this.oldFireLvl < this.fireLvl ){
+				this.goback = false;
+			}
+			
 		}
-		
+		else{
+			//if the older lvl is bigger hide
+			if (this.oldFireLvl > this.fireLvl ){
+				this.goback = true;
+			}
+			//put the fire on
+			this.animateFire();
+				
+		}
+		if(this.alive){
+			//console.log("x:"+this.x+" y:"+this.y+" counter:"+counter);
+			this.context.save();
+			this.context.translate(this.x + this.width/2 , this.y +this.height/2 );
+			this.context.rotate(this.angle * Math.PI / 180);
 			//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
-			this.context.drawImage(imageRepository.bullet, 100, this.sy, this.clippedWidth, this.clippedHeight, this.x, this.y,100,245);
-		
+			this.context.drawImage(imageRepository.bullet, 
+									fireSprite[frame].sx/*sx*/, fireSprite[frame].sy/*sy*/, this.width, this.height,
+									-this.width/2, -this.height/2,this.width, this.height
+									);
+			this.context.restore();
+			counter += 1;
+			if(counter%10 == 0)
+			{
+				frame += 1;
+				if(frame>=fireSprite.length){frame=0;}
+			}
+		}
+	};
+	
+	/*
+	*  Animations for hiding the fire
+	*/
+	this.deanimateFire = function(){
+		//top to bottom animation
+		if (this.fireType == 0){
+			if ( this.y > -this.height-imageRepository.forn.height){
+				this.y -= this.speed;
+			}
+			//clear the fire if it's offscreen
+			if (this.y <= -this.height){
+				this.clear();
+			}
+		}
+		//bottom to top animation
+		else if(this.fireType == 1){
+			if (this.y < this.context.canvas.height){
+				this.y += this.speed;
+			}
+			if(this.y >=this.context.canvas.height){
+				this.clear();
+			}
+		}
+		else if(this.fireType == 2){
+			if(this.x < this.context.canvas.width){
+				this.x += this.speed;
+			}
+			if(this.x >=this.context.canvas.width){
+				this.clear();
+			}
+		}
+		else if(this.fireType == 3){
+			if ( this.x > -this.height-imageRepository.forn.height){
+				this.x -= this.speed;
+			}
+			//clear the fire if it's offscreen
+			if (this.x <= -this.height){
+				this.clear();
+			}
+		}
+	};
+	
+	/*
+	*	Animations for showing the fire
+	*/
+	this.animateFire = function(){
+		//top to bottom animation
+		if (this.fireType == 0){
+			if (this.y < imageRepository.forn.height){
+				this.y += this.speed;
+			}
+		}
+		//bottom to top animation
+		else if(this.fireType == 1){
+			if (this.y >this.context.canvas.height-imageRepository.forn.height-this.height){
+				this.y -= this.speed;
+			}
+		}
+		else if(this.fireType == 2){
+			if(this.x > this.context.canvas.width - this.height - (imageRepository.forn.height/3)){
+				this.x -= this.speed;
+				//height:170 canvas width:500 Forn Height:60
+			}
+		}
+		else if(this.fireType == 3){
+			if (this.x < 95){
+				this.x += this.speed;
+			}
+		}
 	};
 	
 	/*
@@ -172,9 +464,12 @@ function Bullet() {
 		this.y = 0;
 		this.speed = 0;
 		this.alive = false;
+		this.fireLvl = 0;
+		this.oldFireLvl = 0;
+		this.isColliding = false;
 	};
 }
-Bullet.prototype = new Drawable();
+Fire.prototype = new Drawable();
 
 
 /**
@@ -202,31 +497,50 @@ Bullet.prototype = new Drawable();
 function Pool(maxSize) {
 	var size = maxSize; // Max bullets allowed in the pool
 	var pool = [];
-	
 	/*
 	 * Populates the pool array with Bullet objects
 	 */
-	this.init = function() {
+	this.init = function(fireType) {
 		for (var i = 0; i < size; i++) {
 			// Initalize the bullet object
-			var bullet = new Bullet();
-			bullet.init(0,0, imageRepository.bullet.width,
-			            imageRepository.bullet.height);
-			pool[i] = bullet;
+			var fire = new Fire("Fire");
+			fire.init(0,0, imageRepository.bullet.width,
+			            imageRepository.bullet.height,fireAngle[fireType]);
+			fire.collidableWith = "Sardina";
+			fire.type = "Fire";
+			pool[i] = fire;
 		}
 	};
+	
+	this.getPool = function() {
+		var obj = [];
+		for (var i = 0; i < size; i++) {
+			if (pool[i].alive) {
+				obj.push(pool[i]);
+			}
+		}
+		return obj;
+	}
 	
 	/*
 	 * Grabs the last item in the list and initializes it and
 	 * pushes it to the front of the array.
 	 */
-	this.get = function(x, y, speed) {
+	this.get = function(x, y, speed, fireLvl, fireType) {
 		if(!pool[size - 1].alive) {
-			pool[size - 1].spawn(x, y, speed);
+			pool[size - 1].spawn(x, y, speed, fireLvl, fireType);
 			pool.unshift(pool.pop());
 		}
+		else{
+			pool[size-1].oldFireLvl = pool[size-1].fireLvl;
+			pool[size-1].fireLvl = fireLvl;
+		}
 	};
-	
+	this.cancel = function(){
+		if(pool[size - 1].alive){
+			pool[size-1].fireLvl = 0;
+		}
+	};
 	/*
 	 * Used for the sardina to be able to get two bullets at once. If
 	 * only the get() function is used twice, the sardina is able to
@@ -257,8 +571,8 @@ function Pool(maxSize) {
 				break;
 		}
 	};
+	
 }
-
 
 /**
  * Create the Sardina object that the player controls. The sardina is
@@ -269,7 +583,8 @@ function Sardina() {
 	this.speed = 5;
 	this.bulletPool = new Pool(30);
 	this.bulletPool.init();
-
+	this.collidableWith = "Fire";
+	this.type = "Sardina";
 	//var fireRate = 15;
 	//var counter = 0;
 	
@@ -278,38 +593,29 @@ function Sardina() {
 	};
 	this.move = function() {	
 		//counter++;
-		// Determine if the action is move action
-		if (KEY_STATUS.left || KEY_STATUS.right ||
-			KEY_STATUS.down || KEY_STATUS.up) {
-			// The sardina moved, so erase it's current image so it can
-			// be redrawn in it's new location
+		
+			//clear the sardina
 			this.context.clearRect(this.x, this.y, this.width, this.height);
-			
-			// Update x and y according to the direction to move and
-			// redraw the Sardina. Change the else if's to if statements
-			// to have diagonal movement.
-			if (KEY_STATUS.left) {
-				this.x -= this.speed
-				if (this.x <= 60) // Keep player within the screen
-					this.x = 60;
-			} else if (KEY_STATUS.right) {
-				this.x += this.speed
-				if (this.x >= this.canvasWidth - 60 - this.width)
-					this.x = this.canvasWidth - 60 - this.width;
-			} 
-			if (KEY_STATUS.up) {
-				this.y -= this.speed
-				if(this.y <= 60)
-					this.y = 60;
-			} else if (KEY_STATUS.down) {
-				this.y += this.speed
-				if (this.y >= this.canvasHeight - 60 - this.height)
+			//update position
+			this.x = mousePos.x;
+			this.y = mousePos.y;
+			if (this.y >= this.canvasHeight - 60 - this.height){
 					this.y = this.canvasHeight - 60 - this.height;
 			}
-			
+			if(this.y <= 60){
+					this.y = 60;
+			}
+			if (this.x >= this.canvasWidth - 60 - this.width){
+					this.x = this.canvasWidth - 60 - this.width;
+			}
+			if (this.x <= 60){ // Keep player within the screen
+					this.x = 60;
+			}
 			// Finish by redrawing the Sardina
-			this.draw();
-		}
+			if (!this.isColliding) {
+				this.draw();
+			}
+		//}
 		
 	};
 	
@@ -338,28 +644,214 @@ function Corner() {
 	};
 }
 Corner.prototype = new Drawable();
+
+/**
+*
+*Forn_Controller
+*
+**/
+function FornController() {
+	this.forns = [];
+	this.fornCap = 4;
+	this.toggle = false ;
+	var counter = 0;
+	this.init = function() {
+		//Set the forn to start
+		for(var i=0;i<fornCoords.length;i++){
+			var forn = new Forn();
+			forn.init(fornCoords[i].x,fornCoords[i].y,
+					imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
+			forn.fireType = fornCoords[i].fireType;
+			forn.initPool();
+			this.forns.push(forn);
+		}
+	};
+	this.deactivateForns = function(){
+		if (this.toogle){
+			this.forns[0].inUse = false;
+			this.forns[1].inUse = false;
+			this.forns[2].inUse = false;
+			this.forns[9].inUse = false;
+			this.forns[10].inUse = false;
+			this.forns[11].inUse = false;
+		}
+		else{
+			this.forns[3].inUse = false;
+			this.forns[4].inUse = false;
+			this.forns[5].inUse = false;
+			this.forns[6].inUse = false;
+			this.forns[7].inUse = false;
+			this.forns[8].inUse = false;
+		}
+	};
+	
+	this.update = function(){
+		counter--;
+		if (KEY_STATUS.toogle){
+			if (counter <=0){
+				this.toogle = this.toogle ? false : true;
+				//console.log(this.toogle);
+				counter = 15;
+			}
+		}
+		if(this.toogle){
+			//LEFT ROW
+			if (KEY_STATUS.topLeft){
+				this.forns[3].inUse = true;
+			}
+			else{
+				this.forns[3].inUse = false;
+			}
+			if (KEY_STATUS.topMiddle){
+				this.forns[4].inUse = true;
+			}
+			else{
+				this.forns[4].inUse = false;
+			}
+			if (KEY_STATUS.topRight){
+				this.forns[5].inUse = true;
+			}
+			else{
+				this.forns[5].inUse = false;
+			}
+			//RIGHT ROW
+			if (KEY_STATUS.bottomLeft){
+				this.forns[6].inUse = true;
+			}
+			else{
+				this.forns[6].inUse = false;
+			}
+			if (KEY_STATUS.bottomMiddle){
+				this.forns[7].inUse = true;
+			}
+			else{
+				this.forns[7].inUse = false;
+			}
+			if (KEY_STATUS.bottomRight){
+				this.forns[8].inUse = true;
+			}
+			else{
+				this.forns[8].inUse = false;
+			}
+		}else{
+			//TOP ROW
+			if (KEY_STATUS.topLeft){
+				this.forns[0].inUse = true;
+			}
+			else{
+				this.forns[0].inUse = false;
+			}
+			if (KEY_STATUS.topMiddle){
+				this.forns[1].inUse = true;
+			}
+			else{
+				this.forns[1].inUse = false;
+			}
+			if (KEY_STATUS.topRight){
+				this.forns[2].inUse = true;
+			}
+			else{
+				this.forns[2].inUse = false;
+			}
+			//BOTTOM ROW
+			if (KEY_STATUS.bottomLeft){
+				this.forns[9].inUse = true;
+			}
+			else{
+				this.forns[9].inUse = false;
+			}
+			if (KEY_STATUS.bottomMiddle){
+				this.forns[10].inUse = true;
+			}
+			else{
+				this.forns[10].inUse = false;
+			}
+			if (KEY_STATUS.bottomRight){
+				this.forns[11].inUse = true;
+			}
+			else{
+				this.forns[11].inUse = false;
+			}
+		}
+		this.deactivateForns();
+		
+		//update forns and draw
+		for (var i = 0; i< this.forns.length; i++){
+			this.forns[i].move();
+			this.forns[i].firePool.animate();
+		}
+		//console.log("inUse:"+this.forns[0].inUse+" firelvl:"+this.forns[0].firelvl+" state:"+this.forns[0].state);
+	};
+}
 /**
 *Creates the forn object that will shoot back to the sardina
 *
 */
 function Forn() {
 	this.speed = 2;
-	this.bulletPool = new Pool(30);
-	this.bulletPool.init();
-	
-	var fireRate = 10;
+	this.firePool = new Pool(1);
+	this.inUse = false;
+	this.fireType = 0;
+	this.fireDelay = 60;
+	this.firelvl = 0;
+	this.state = 0;
+	var stateRate = this.fireDelay/3;
 	var counter = 0;
+	
+	this.initPool = function(){
+		this.firePool.init(this.fireType);
+	};
 	
 	this.draw = function() {
 		this.context.save();
 		this.context.translate(this.x + 100/2 , this.y +this.height/2 );
 		this.context.rotate(this.angle * Math.PI / 180);
-		this.context.drawImage(imageRepository.forn,0,0, 100,this.height, -100 /2, -this.height/2,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.drawImage(imageRepository.forn, fornSprite[this.firelvl][this.state].sx,
+								fornSprite[this.firelvl][this.state].sy,
+								100,this.height, -100 /2, -this.height/2,100,this.height);
 		this.context.restore();
 	};
-	this.move = function() {	
-		counter++;
-		this.fire();
+	this.move = function() {
+		if (this.inUse){
+			counter++;
+			if(counter%stateRate === 0){
+				if (this.state+1 == 3 ){
+					this.state = 0;
+					if (this.firelvl+1 != 3){
+						this.firelvl +=1;
+					}
+				}else{
+					this.state += 1;
+				}
+				counter = 0;
+			}
+		}
+		else{
+			counter--;
+			if( (this.state == 0) && (this.firelvl == 0)){
+				counter = 0;
+			}
+			else if(counter <= 0){
+				if (this.state == 0){
+					if (this.firelvl-1 >= 0){
+						this.firelvl -= 1;
+						this.state = 2;
+					}
+				}
+				else{
+						this.state -=1;
+				}
+				counter = stateRate;
+			}
+		}
+		
+		if (this.firelvl >= 1 ){
+			this.fire();
+		}
+		else{
+			this.firePool.cancel();
+		}
 		// Determine if the action is move action
 		this.draw();
 		
@@ -369,7 +861,20 @@ function Forn() {
 	 * Fires the fire
 	 */
 	this.fire = function() {
-		this.bulletPool.get(this.x, this.y, 3);
+		if (this.fireType == 0){
+			this.firePool.get(this.x, this.height-imageRepository.bullet.height, 3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		else if (this.fireType == 1){
+			this.firePool.get(this.x, this.y+this.height/*100,100*/, 3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		else if (this.fireType == 2){
+			this.firePool.get(this.x+imageRepository.bullet.height, this.y-54/*100,100*/, 3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		else if (this.fireType == 3){
+			this.firePool.get(this.x-imageRepository.bullet.height, this.y-54, 
+								3,this.firelvl,this.fireType);//add firetype and lvl
+		}
+		console.log(this.x+" Y: "+this.y);
 	};
 }
 Forn.prototype = new Drawable();
@@ -390,14 +895,22 @@ function Game() {
 		this.bgCanvas = document.getElementById('background');
 		this.shipCanvas = document.getElementById('sardina');
 		this.mainCanvas = document.getElementById('main');
-		
+		this.fireCanvas = document.getElementById('faia');
+		//map mouse to move sardina
+		this.shipCanvas.addEventListener('mousemove', 
+										function(evt) 
+										{
+											mousePos = getMousePos(document.getElementById('sardina'), evt);
+										},
+										false);
 		// Test to see if canvas is supported. Only need to
 		// check one canvas
 		if (this.bgCanvas.getContext) {
 			this.bgContext = this.bgCanvas.getContext('2d');
 			this.shipContext = this.shipCanvas.getContext('2d');
 			this.mainContext = this.mainCanvas.getContext('2d');
-		
+			this.fireContext = this.fireCanvas.getContext('2d');
+			
 			// Initialize objects to contain their context and canvas
 			// information
 			Background.prototype.context = this.bgContext;
@@ -408,21 +921,24 @@ function Game() {
 			Sardina.prototype.canvasWidth = this.shipCanvas.width;
 			Sardina.prototype.canvasHeight = this.shipCanvas.height;
 			
-			Bullet.prototype.context = this.mainContext;
-			Bullet.prototype.canvasWidth = this.mainCanvas.width;
-			Bullet.prototype.canvasHeight = this.mainCanvas.height;
+			Fire.prototype.context = this.fireContext;
+			Fire.prototype.canvasWidth = this.fireCanvas.width;
+			Fire.prototype.canvasHeight = this.fireCanvas.height;
 			
-			Forn.prototype.context = this.shipContext;
-			Forn.prototype.canvasWidth = this.shipCanvas.width;
-			Forn.prototype.canvasHeight = this.shipCanvas.height;
+			Forn.prototype.context = this.mainContext;
+			Forn.prototype.canvasWidth = this.mainCanvas.width;
+			Forn.prototype.canvasHeight = this.mainCanvas.height;
 			
-			Corner.prototype.context = this.shipContext;
-			Corner.prototype.canvasWidth = this.shipCanvas.width;
-			Corner.prototype.canvasHeight = this.shipCanvas.height;
+			Corner.prototype.context = this.mainContext;
+			Corner.prototype.canvasWidth = this.mainCanvas.width;
+			Corner.prototype.canvasHeight = this.mainCanvas.height;
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
 			
+			//Initialize the fornController
+			this.forncontroller = new FornController();
+			this.forncontroller.init();
 			// Initialize the sardina object
 			this.sardina = new Sardina();
 			// Set the sardina to start in the middle of the canvas
@@ -430,20 +946,27 @@ function Game() {
 			var shipStartY = this.shipCanvas.height/2;
 			this.sardina.init(shipStartX, shipStartY, imageRepository.sardina.width,
 			               imageRepository.sardina.height);
-			//Set the forn to start
-			this.forns = [];
-			for(var i=0;i<fornCoords.length;i++){
-				var forn = new Forn();
-				forn.init(fornCoords[i].x,fornCoords[i].y,
-							imageRepository.forn.width,imageRepository.forn.height,fornCoords[i].angle);
-				this.forns.push(forn);
-			}
+			
 			for (var i=0; i <cornCoords.length; i++){
 				var corner = new Corner();
 				corner.init(cornCoords[i].x,cornCoords[i].y,
 							imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
 				corner.draw();
 			}
+			
+			//AUDIO
+			this.backgroundAudio = new Audio("sounds/loop-1.ogg");
+			this.backgroundAudio.loop = true;
+			this.backgroundAudio.volume = .25;
+			this.backgroundAudio.load();
+			
+			//check if audio is loaded
+			this.checkAudio = window.setInterval(function(){checkReadyState()},1000);
+			
+			//Start the quadtree
+			this.quadTree = new QuadTree({x:0,y:0,width:this.mainCanvas.width,height:this.mainCanvas.height});
+			
+			
 			return true;
 		} else {
 			return false;
@@ -453,11 +976,20 @@ function Game() {
 	// Start the animation loop
 	this.start = function() {
 		this.sardina.draw();
-		for(var i=0;i<this.forns.length;i++){
-			this.forns[i].draw();
-		}
+		this.backgroundAudio.play();
+		this.forncontroller.update();
 		animate();
 	};
+}
+
+/**
+ * Ensure the game sound has loaded before starting the game
+ */
+function checkReadyState() {
+	if ( game.backgroundAudio.readyState === 4) {
+		window.clearInterval(game.checkAudio);
+		game.start();
+	}
 }
 
 
@@ -468,15 +1000,47 @@ function Game() {
  * object.
  */
 function animate() {
+	// Insert objects into quadtree
+	game.quadTree.clear();
+	game.quadTree.insert(game.sardina);
+	for(i=0;i<game.forncontroller.forns.length;i++){
+		game.quadTree.insert(game.forncontroller.forns[i].firePool.getPool());
+	}
+	detectCollision();
+
+	// Animate game objects
+	
 	requestAnimFrame( animate );
 	game.background.draw();
 	game.sardina.move();
 	game.sardina.bulletPool.animate();
-	for(i=0;i<game.forns.length;i++){
-		game.forns[i].move();
-	}
+	// Clear the fire canvas and redraw!
+	game.fireContext.clearRect(0, 0, game.fireCanvas.width, game.fireCanvas.height);
+	game.forncontroller.update();
 	//game.forn.bulletPool.animate();
 }
+
+function detectCollision() {
+	var objects = [];
+	game.quadTree.getAllObjects(objects);
+
+	for (var x = 0, len = objects.length; x < len; x++) {
+		game.quadTree.findObjects(obj = [], objects[x]);
+
+		for (y = 0, length = obj.length; y < length; y++) {
+
+			// DETECT COLLISION ALGORITHM
+			if (objects[x].collidableWith === obj[y].type &&
+				(objects[x].x < obj[y].x + obj[y].width &&
+			     objects[x].x + objects[x].width > obj[y].x &&
+				 objects[x].y < obj[y].y + obj[y].height &&
+				 objects[x].y + objects[x].height > obj[y].y)) {
+				objects[x].isColliding = true;
+				obj[y].isColliding = true;
+			}
+		}
+	}
+};
 
 
 // The keycodes that will be mapped when a user presses a button.
@@ -487,11 +1051,14 @@ KEY_CODES = {
   38: 'up',
   39: 'right',
   40: 'down',
-  97: 'bottom_left',
-  98: 'bottom_middle',
-  99: 'bottom_right',
-  100: 'middle_left',
-  102: 'middle_right',
+  74: 'bottomLeft',
+  75: 'bottomMiddle',
+  76: 'bottomRight',
+  65: 'topLeft',
+  83: 'topMiddle',
+  68: 'topRight',
+  84: 'toogle'
+  
 };
 
 // Creates the array to hold the KEY_CODES and sets all their values
@@ -530,7 +1097,18 @@ document.onkeyup = function(e) {
     KEY_STATUS[KEY_CODES[keyCode]] = false;
   }
 }
-
+/**
+*
+*Reads mouse coordinates and returns them
+*
+**/
+function getMousePos(canvas,evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+			x: Math.round((evt.clientX-rect.left)/(rect.right-rect.left)*canvas.width),
+			y: Math.round((evt.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height)
+        };
+}
 /**	
  * requestAnim shim layer by Paul Irish
  * Finds the first API that works to optimize the animation loop, 
