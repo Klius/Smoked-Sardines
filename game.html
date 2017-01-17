@@ -22,7 +22,10 @@
 			#main {
 				z-index: 0;
 			}
-			#ship {
+			#sardina {
+				z-index: 2;
+			}
+			#overlay{
 				z-index: 1;
 			}
 		</style>
@@ -39,10 +42,13 @@
 		<!-- -->
 		<canvas id="faia" width="500" height="460">
 		</canvas>
+		<canvas id="overlay" width="500" height="460">
+		</canvas>
 		<!-- The canvas the ship uses (can only move up
          one forth the screen.) -->
 		<canvas id="sardina" width="500" height="460">
 		</canvas>
+		
 		</div>
 		<script src="forn-coord.js"></script>
 		<script src="game.js"></script>
