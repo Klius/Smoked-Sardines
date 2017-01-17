@@ -42,3 +42,17 @@ var fireSprite = [
 					{"sx":200,"sy":0},
 					{"sx":300,"sy":0}
 ];
+var fornOverlays = [
+					{"x":100,"y":100,"letter":"A"},
+					{"x":100,"y":100,"letter":"S"},
+					{"x":200,"y":0,"letter":"D"},
+					{"x":300,"y":0,"letter":"A"},
+					{"x":100,"y":0,"letter":"S"},
+					{"x":200,"y":0,"letter":"D"},
+					{"x":300,"y":0,"letter":"J"},
+					{"x":100,"y":0,"letter":"K"},
+					{"x":200,"y":0,"letter":"L"},
+					{"x":300,"y":0,"letter":"J"},
+					{"x":100,"y":0,"letter":"K"},
+					{"x":200,"y":0,"letter":"L"}
+];

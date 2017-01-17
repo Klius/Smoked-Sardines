@@ -306,10 +306,22 @@ function Background() {
 // Set Background to inherit properties from Drawable
 Background.prototype = new Drawable();
 
-
 /**
- * Creates the Bullet object which the sardina fires. The bullets are
- * drawn on the "main" canvas.
+ * The UI Overlay instructions for the forns
+ */
+ function Overlay(){
+	this.letter = "A";
+	this.draw = function(){
+		this.context.fillStyle = "white";
+		this.context.font = "30px Arial";
+		this.context.fillText(this.letter,this.x,this.y);
+		//console.log("Letter: "+this.letter+" x:"+this.x+" y:"+this.y);
+	};
+ }
+ Overlay.prototype = new Drawable();
+/**
+ * Creates the Bullet object which the sardina avoids. The bullets are
+ * drawn on the "faia" canvas.
  */
 function Fire() {	
 	this.alive = false; // Is true if the bullet is currently in use
@@ -658,6 +670,7 @@ Corner.prototype = new Drawable();
 **/
 function FornController() {
 	this.forns = [];
+	this.overlays = [];
 	this.fornCap = 4;
 	this.toggleTop = false ;
 	this.toggleBottom = false;
@@ -672,6 +685,14 @@ function FornController() {
 			forn.fireType = fornCoords[i].fireType;
 			forn.initPool();
 			this.forns.push(forn);
+		}
+		//Set the overlays
+		for (var i=0;i<fornOverlays.length;i++)
+		{
+			var overlay = new Overlay();
+			overlay.init(fornOverlays[i].x,fornOverlays[i].y,
+						 30,30,0);
+			this.overlays.push(overlay);
 		}
 	};
 	this.deactivateForns = function(){
@@ -745,6 +766,10 @@ function FornController() {
 		for (var i = 0; i< this.forns.length; i++){
 			this.forns[i].move();
 			this.forns[i].firePool.animate();
+		}
+		//update overlays
+		for (var i = 0; i< this.overlays.length; i++){
+			this.overlays[i].draw();
 		}
 	};
 }
@@ -861,6 +886,7 @@ function Game() {
 		this.shipCanvas = document.getElementById('sardina');
 		this.mainCanvas = document.getElementById('main');
 		this.fireCanvas = document.getElementById('faia');
+		this.overlayCanvas = document.getElementById('overlay');
 		//map mouse to move sardina
 		this.shipCanvas.addEventListener('mousemove', 
 										function(evt) 
@@ -875,7 +901,7 @@ function Game() {
 			this.shipContext = this.shipCanvas.getContext('2d');
 			this.mainContext = this.mainCanvas.getContext('2d');
 			this.fireContext = this.fireCanvas.getContext('2d');
-			
+			this.overlayContext = this.overlayCanvas.getContext('2d');
 			// Initialize objects to contain their context and canvas
 			// information
 			Background.prototype.context = this.bgContext;
@@ -893,6 +919,10 @@ function Game() {
 			Forn.prototype.context = this.mainContext;
 			Forn.prototype.canvasWidth = this.mainCanvas.width;
 			Forn.prototype.canvasHeight = this.mainCanvas.height;
+			
+			Overlay.prototype.context = this.overlayContext;
+			Overlay.prototype.canvasWidth = this.overlayCanvas.width;
+			Overlay.prototype.canvasHeight = this.overlayCanvas.height;
 			
 			Corner.prototype.context = this.mainContext;
 			Corner.prototype.canvasWidth = this.mainCanvas.width;
