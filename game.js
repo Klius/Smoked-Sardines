@@ -306,10 +306,36 @@ function Background() {
 // Set Background to inherit properties from Drawable
 Background.prototype = new Drawable();
 
-
 /**
- * Creates the Bullet object which the sardina fires. The bullets are
- * drawn on the "main" canvas.
+ * The UI Overlay instructions for the forns
+ */
+ function Overlay(){
+	this.letter = "A";
+	this.hide =	false;
+	this.draw = function(){
+		if (!this.hide && !this.drawed){
+			this.context.beginPath();
+			this.context.strokeStyle = "black";
+			this.context.fillStyle = "white";
+			this.context.rect(this.x-5, this.y-this.height+5, this.width, this.height);
+			this.context.stroke();
+			this.context.fill();
+			this.context.closePath();
+			this.context.fillStyle = "black";
+			this.context.font = "30px Arial";
+			this.context.fillText(this.letter,this.x,this.y);
+			this.drawed = true;
+		}
+		else if(this.hide && this.drawed){
+			this.context.clearRect(this.x-6, this.y-this.height+4, this.width+10, this.height+10);
+			this.drawed = false;
+		}
+	};
+ }
+ Overlay.prototype = new Drawable();
+/**
+ * Creates the Bullet object which the sardina avoids. The bullets are
+ * drawn on the "faia" canvas.
  */
 function Fire() {	
 	this.alive = false; // Is true if the bullet is currently in use
@@ -658,6 +684,7 @@ Corner.prototype = new Drawable();
 **/
 function FornController() {
 	this.forns = [];
+	this.overlays = [];
 	this.fornCap = 4;
 	this.toggleTop = false ;
 	this.toggleBottom = false;
@@ -673,28 +700,48 @@ function FornController() {
 			forn.initPool();
 			this.forns.push(forn);
 		}
+		//Set the overlays
+		for (var i=0;i<fornOverlays.length;i++)
+		{
+			var overlay = new Overlay();
+			overlay.init(fornOverlays[i].x,fornOverlays[i].y,
+						 30,30,0);
+			overlay.hide = fornOverlays[i].hide;
+			overlay.letter = fornOverlays[i].letter;
+			this.overlays.push(overlay);
+		}
 	};
 	this.deactivateForns = function(){
 		if (this.toggleTop){
 			this.forns[0].inUse = false;
 			this.forns[1].inUse = false;
 			this.forns[2].inUse = false;
-
+			this.overlays[0].hide = true;
+			this.overlays[1].hide = true;
+			this.overlays[2].hide = true;
 		}
 		else{
 			this.forns[3].inUse = false;
 			this.forns[4].inUse = false;
 			this.forns[5].inUse = false;
-
+			this.overlays[3].hide = true;
+			this.overlays[4].hide = true;
+			this.overlays[5].hide = true;
 		}
 		if (this.toggleBottom){
 			this.forns[9].inUse = false;
 			this.forns[10].inUse = false;
 			this.forns[11].inUse = false;
+			this.overlays[9].hide = true;
+			this.overlays[10].hide = true;
+			this.overlays[11].hide = true;
 		}else{
 			this.forns[6].inUse = false;
 			this.forns[7].inUse = false;
 			this.forns[8].inUse = false;
+			this.overlays[6].hide = true;
+			this.overlays[7].hide = true;
+			this.overlays[8].hide = true;
 		}
 	};
 	this.readInput = function(){
@@ -717,22 +764,34 @@ function FornController() {
 			this.forns[3].inUse = KEY_STATUS.topLeft ? true : false;
 			this.forns[4].inUse = KEY_STATUS.topMiddle ? true : false;
 			this.forns[5].inUse = KEY_STATUS.topRight ? true : false;
+			this.overlays[3].hide = false;
+			this.overlays[4].hide = false;
+			this.overlays[5].hide = false;
 		}else{
 			//TOP ROW
 			this.forns[0].inUse = KEY_STATUS.topLeft ? true : false;
 			this.forns[1].inUse = KEY_STATUS.topMiddle ? true : false;
 			this.forns[2].inUse = KEY_STATUS.topRight ? true : false;
+			this.overlays[0].hide = false;
+			this.overlays[1].hide = false;
+			this.overlays[2].hide = false;
 		}
 		if(this.toggleBottom){
 			//RIGHT ROW
 			this.forns[6].inUse = KEY_STATUS.bottomLeft ? true : false;
 			this.forns[7].inUse = KEY_STATUS.bottomMiddle ? true : false;
 			this.forns[8].inUse = KEY_STATUS.bottomRight ? true : false;
+			this.overlays[6].hide = false;
+			this.overlays[7].hide = false;
+			this.overlays[8].hide = false;
 		}else{
 			//BOTTOM ROW
 			this.forns[9].inUse = KEY_STATUS.bottomLeft ? true : false;
 			this.forns[10].inUse = KEY_STATUS.bottomMiddle ? true : false;
 			this.forns[11].inUse = KEY_STATUS.bottomRight ? true : false;
+			this.overlays[9].hide = false;
+			this.overlays[10].hide = false;
+			this.overlays[11].hide = false;
 		}
 	};
 	this.update = function(){
@@ -745,6 +804,10 @@ function FornController() {
 		for (var i = 0; i< this.forns.length; i++){
 			this.forns[i].move();
 			this.forns[i].firePool.animate();
+		}
+		//update overlays
+		for (var i = 0; i< this.overlays.length; i++){
+			this.overlays[i].draw();
 		}
 	};
 }
@@ -861,6 +924,7 @@ function Game() {
 		this.shipCanvas = document.getElementById('sardina');
 		this.mainCanvas = document.getElementById('main');
 		this.fireCanvas = document.getElementById('faia');
+		this.overlayCanvas = document.getElementById('overlay');
 		//map mouse to move sardina
 		this.shipCanvas.addEventListener('mousemove', 
 										function(evt) 
@@ -875,7 +939,7 @@ function Game() {
 			this.shipContext = this.shipCanvas.getContext('2d');
 			this.mainContext = this.mainCanvas.getContext('2d');
 			this.fireContext = this.fireCanvas.getContext('2d');
-			
+			this.overlayContext = this.overlayCanvas.getContext('2d');
 			// Initialize objects to contain their context and canvas
 			// information
 			Background.prototype.context = this.bgContext;
@@ -893,6 +957,10 @@ function Game() {
 			Forn.prototype.context = this.mainContext;
 			Forn.prototype.canvasWidth = this.mainCanvas.width;
 			Forn.prototype.canvasHeight = this.mainCanvas.height;
+			
+			Overlay.prototype.context = this.overlayContext;
+			Overlay.prototype.canvasWidth = this.overlayCanvas.width;
+			Overlay.prototype.canvasHeight = this.overlayCanvas.height;
 			
 			Corner.prototype.context = this.mainContext;
 			Corner.prototype.canvasWidth = this.mainCanvas.width;
