@@ -311,11 +311,25 @@ Background.prototype = new Drawable();
  */
  function Overlay(){
 	this.letter = "A";
+	this.hide =	false;
 	this.draw = function(){
-		this.context.fillStyle = "white";
-		this.context.font = "30px Arial";
-		this.context.fillText(this.letter,this.x,this.y);
-		//console.log("Letter: "+this.letter+" x:"+this.x+" y:"+this.y);
+		if (!this.hide && !this.drawed){
+			this.context.beginPath();
+			this.context.strokeStyle = "black";
+			this.context.fillStyle = "white";
+			this.context.rect(this.x-5, this.y-this.height+5, this.width, this.height);
+			this.context.stroke();
+			this.context.fill();
+			this.context.closePath();
+			this.context.fillStyle = "black";
+			this.context.font = "30px Arial";
+			this.context.fillText(this.letter,this.x,this.y);
+			this.drawed = true;
+		}
+		else if(this.hide && this.drawed){
+			this.context.clearRect(this.x-6, this.y-this.height+4, this.width+10, this.height+10);
+			this.drawed = false;
+		}
 	};
  }
  Overlay.prototype = new Drawable();
@@ -692,6 +706,8 @@ function FornController() {
 			var overlay = new Overlay();
 			overlay.init(fornOverlays[i].x,fornOverlays[i].y,
 						 30,30,0);
+			overlay.hide = fornOverlays[i].hide;
+			overlay.letter = fornOverlays[i].letter;
 			this.overlays.push(overlay);
 		}
 	};
@@ -700,22 +716,32 @@ function FornController() {
 			this.forns[0].inUse = false;
 			this.forns[1].inUse = false;
 			this.forns[2].inUse = false;
-
+			this.overlays[0].hide = true;
+			this.overlays[1].hide = true;
+			this.overlays[2].hide = true;
 		}
 		else{
 			this.forns[3].inUse = false;
 			this.forns[4].inUse = false;
 			this.forns[5].inUse = false;
-
+			this.overlays[3].hide = true;
+			this.overlays[4].hide = true;
+			this.overlays[5].hide = true;
 		}
 		if (this.toggleBottom){
 			this.forns[9].inUse = false;
 			this.forns[10].inUse = false;
 			this.forns[11].inUse = false;
+			this.overlays[9].hide = true;
+			this.overlays[10].hide = true;
+			this.overlays[11].hide = true;
 		}else{
 			this.forns[6].inUse = false;
 			this.forns[7].inUse = false;
 			this.forns[8].inUse = false;
+			this.overlays[6].hide = true;
+			this.overlays[7].hide = true;
+			this.overlays[8].hide = true;
 		}
 	};
 	this.readInput = function(){
@@ -738,22 +764,34 @@ function FornController() {
 			this.forns[3].inUse = KEY_STATUS.topLeft ? true : false;
 			this.forns[4].inUse = KEY_STATUS.topMiddle ? true : false;
 			this.forns[5].inUse = KEY_STATUS.topRight ? true : false;
+			this.overlays[3].hide = false;
+			this.overlays[4].hide = false;
+			this.overlays[5].hide = false;
 		}else{
 			//TOP ROW
 			this.forns[0].inUse = KEY_STATUS.topLeft ? true : false;
 			this.forns[1].inUse = KEY_STATUS.topMiddle ? true : false;
 			this.forns[2].inUse = KEY_STATUS.topRight ? true : false;
+			this.overlays[0].hide = false;
+			this.overlays[1].hide = false;
+			this.overlays[2].hide = false;
 		}
 		if(this.toggleBottom){
 			//RIGHT ROW
 			this.forns[6].inUse = KEY_STATUS.bottomLeft ? true : false;
 			this.forns[7].inUse = KEY_STATUS.bottomMiddle ? true : false;
 			this.forns[8].inUse = KEY_STATUS.bottomRight ? true : false;
+			this.overlays[6].hide = false;
+			this.overlays[7].hide = false;
+			this.overlays[8].hide = false;
 		}else{
 			//BOTTOM ROW
 			this.forns[9].inUse = KEY_STATUS.bottomLeft ? true : false;
 			this.forns[10].inUse = KEY_STATUS.bottomMiddle ? true : false;
 			this.forns[11].inUse = KEY_STATUS.bottomRight ? true : false;
+			this.overlays[9].hide = false;
+			this.overlays[10].hide = false;
+			this.overlays[11].hide = false;
 		}
 	};
 	this.update = function(){

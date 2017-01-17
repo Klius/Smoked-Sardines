@@ -43,16 +43,16 @@ var fireSprite = [
 					{"sx":300,"sy":0}
 ];
 var fornOverlays = [
-					{"x":100,"y":100,"letter":"A"},
-					{"x":100,"y":100,"letter":"S"},
-					{"x":200,"y":0,"letter":"D"},
-					{"x":300,"y":0,"letter":"A"},
-					{"x":100,"y":0,"letter":"S"},
-					{"x":200,"y":0,"letter":"D"},
-					{"x":300,"y":0,"letter":"J"},
-					{"x":100,"y":0,"letter":"K"},
-					{"x":200,"y":0,"letter":"L"},
-					{"x":300,"y":0,"letter":"J"},
-					{"x":100,"y":0,"letter":"K"},
-					{"x":200,"y":0,"letter":"L"}
+					{"x":100,"y":40,"letter":"A","hide":false},
+					{"x":200,"y":40,"letter":"S","hide":false},
+					{"x":300,"y":40,"letter":"D","hide":false},
+					{"x":20,"y":90,"letter":"A","hide":true},
+					{"x":20,"y":190,"letter":"S","hide":true},
+					{"x":20,"y":290,"letter":"D","hide":true},
+					{"x":460,"y":90,"letter":"J","hide":true},
+					{"x":460,"y":190,"letter":"K","hide":true},
+					{"x":460,"y":290,"letter":"L","hide":true},
+					{"x":100,"y":440,"letter":"J","hide":false},
+					{"x":200,"y":440,"letter":"K","hide":false},
+					{"x":300,"y":440,"letter":"L","hide":false}
 ];
