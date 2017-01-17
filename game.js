@@ -366,7 +366,14 @@ function Fire() {
 				
 		}
 		if(this.alive){
-			//console.log("x:"+this.x+" y:"+this.y+" counter:"+counter);
+			this.render();
+		}
+	};
+	/*
+	*
+	*/
+	this.render = function(){
+		//console.log("x:"+this.x+" y:"+this.y+" counter:"+counter);
 			this.context.save();
 			this.context.translate(this.x + this.width/2 , this.y +this.height/2 );
 			this.context.rotate(this.angle * Math.PI / 180);
@@ -377,14 +384,13 @@ function Fire() {
 									);
 			this.context.restore();
 			counter += 1;
-			if(counter%10 == 0)
+			if(counter%7 == 0)
 			{
+				counter = 0;
 				frame += 1;
-				if(frame>=fireSprite.length){frame=0;}
+				if(frame >= fireSprite.length){frame = 0;}
 			}
-		}
 	};
-	
 	/*
 	*  Animations for hiding the fire
 	*/
@@ -653,8 +659,10 @@ Corner.prototype = new Drawable();
 function FornController() {
 	this.forns = [];
 	this.fornCap = 4;
-	this.toggle = false ;
-	var counter = 0;
+	this.toggleTop = false ;
+	this.toggleBottom = false;
+	var counterTop = 0;
+	var counterBottom = 0;
 	this.init = function() {
 		//Set the forn to start
 		for(var i=0;i<fornCoords.length;i++){
@@ -667,112 +675,70 @@ function FornController() {
 		}
 	};
 	this.deactivateForns = function(){
-		if (this.toogle){
+		if (this.toggleTop){
 			this.forns[0].inUse = false;
 			this.forns[1].inUse = false;
 			this.forns[2].inUse = false;
-			this.forns[9].inUse = false;
-			this.forns[10].inUse = false;
-			this.forns[11].inUse = false;
+
 		}
 		else{
 			this.forns[3].inUse = false;
 			this.forns[4].inUse = false;
 			this.forns[5].inUse = false;
+
+		}
+		if (this.toggleBottom){
+			this.forns[9].inUse = false;
+			this.forns[10].inUse = false;
+			this.forns[11].inUse = false;
+		}else{
 			this.forns[6].inUse = false;
 			this.forns[7].inUse = false;
 			this.forns[8].inUse = false;
 		}
 	};
-	
-	this.update = function(){
-		counter--;
-		if (KEY_STATUS.toogle){
-			if (counter <=0){
-				this.toogle = this.toogle ? false : true;
-				//console.log(this.toogle);
-				counter = 15;
+	this.readInput = function(){
+		counterTop--;
+		counterBottom--;
+		if (KEY_STATUS.toogleTop ){
+			if (counterTop <=0){
+				this.toggleTop = this.toggleTop ? false : true;
+				counterTop = 15;
 			}
 		}
-		if(this.toogle){
+		if(KEY_STATUS.toogleBottom){
+			if (counterBottom <=0){
+				this.toggleBottom = this.toggleBottom ? false : true;
+				counterBottom = 15;
+			}
+		}
+		if(this.toggleTop){
 			//LEFT ROW
-			if (KEY_STATUS.topLeft){
-				this.forns[3].inUse = true;
-			}
-			else{
-				this.forns[3].inUse = false;
-			}
-			if (KEY_STATUS.topMiddle){
-				this.forns[4].inUse = true;
-			}
-			else{
-				this.forns[4].inUse = false;
-			}
-			if (KEY_STATUS.topRight){
-				this.forns[5].inUse = true;
-			}
-			else{
-				this.forns[5].inUse = false;
-			}
-			//RIGHT ROW
-			if (KEY_STATUS.bottomLeft){
-				this.forns[6].inUse = true;
-			}
-			else{
-				this.forns[6].inUse = false;
-			}
-			if (KEY_STATUS.bottomMiddle){
-				this.forns[7].inUse = true;
-			}
-			else{
-				this.forns[7].inUse = false;
-			}
-			if (KEY_STATUS.bottomRight){
-				this.forns[8].inUse = true;
-			}
-			else{
-				this.forns[8].inUse = false;
-			}
+			this.forns[3].inUse = KEY_STATUS.topLeft ? true : false;
+			this.forns[4].inUse = KEY_STATUS.topMiddle ? true : false;
+			this.forns[5].inUse = KEY_STATUS.topRight ? true : false;
 		}else{
 			//TOP ROW
-			if (KEY_STATUS.topLeft){
-				this.forns[0].inUse = true;
-			}
-			else{
-				this.forns[0].inUse = false;
-			}
-			if (KEY_STATUS.topMiddle){
-				this.forns[1].inUse = true;
-			}
-			else{
-				this.forns[1].inUse = false;
-			}
-			if (KEY_STATUS.topRight){
-				this.forns[2].inUse = true;
-			}
-			else{
-				this.forns[2].inUse = false;
-			}
-			//BOTTOM ROW
-			if (KEY_STATUS.bottomLeft){
-				this.forns[9].inUse = true;
-			}
-			else{
-				this.forns[9].inUse = false;
-			}
-			if (KEY_STATUS.bottomMiddle){
-				this.forns[10].inUse = true;
-			}
-			else{
-				this.forns[10].inUse = false;
-			}
-			if (KEY_STATUS.bottomRight){
-				this.forns[11].inUse = true;
-			}
-			else{
-				this.forns[11].inUse = false;
-			}
+			this.forns[0].inUse = KEY_STATUS.topLeft ? true : false;
+			this.forns[1].inUse = KEY_STATUS.topMiddle ? true : false;
+			this.forns[2].inUse = KEY_STATUS.topRight ? true : false;
 		}
+		if(this.toggleBottom){
+			//RIGHT ROW
+			this.forns[6].inUse = KEY_STATUS.bottomLeft ? true : false;
+			this.forns[7].inUse = KEY_STATUS.bottomMiddle ? true : false;
+			this.forns[8].inUse = KEY_STATUS.bottomRight ? true : false;
+		}else{
+			//BOTTOM ROW
+			this.forns[9].inUse = KEY_STATUS.bottomLeft ? true : false;
+			this.forns[10].inUse = KEY_STATUS.bottomMiddle ? true : false;
+			this.forns[11].inUse = KEY_STATUS.bottomRight ? true : false;
+		}
+	};
+	this.update = function(){
+		//read if there is any key pressed
+		this.readInput();
+		//shutdown any active forns
 		this.deactivateForns();
 		
 		//update forns and draw
@@ -780,7 +746,6 @@ function FornController() {
 			this.forns[i].move();
 			this.forns[i].firePool.animate();
 		}
-		//console.log("inUse:"+this.forns[0].inUse+" firelvl:"+this.forns[0].firelvl+" state:"+this.forns[0].state);
 	};
 }
 /**
@@ -792,7 +757,7 @@ function Forn() {
 	this.firePool = new Pool(1);
 	this.inUse = false;
 	this.fireType = 0;
-	this.fireDelay = 60;
+	this.fireDelay = 30;
 	this.firelvl = 0;
 	this.state = 0;
 	var stateRate = this.fireDelay/3;
@@ -874,7 +839,7 @@ function Forn() {
 			this.firePool.get(this.x-imageRepository.bullet.height, this.y-54, 
 								3,this.firelvl,this.fireType);//add firetype and lvl
 		}
-		console.log(this.x+" Y: "+this.y);
+		//console.log(this.x+" Y: "+this.y);
 	};
 }
 Forn.prototype = new Drawable();
@@ -1057,7 +1022,8 @@ KEY_CODES = {
   65: 'topLeft',
   83: 'topMiddle',
   68: 'topRight',
-  84: 'toogle'
+  84: 'toogleTop',
+  66: 'toogleBottom'
   
 };
 
