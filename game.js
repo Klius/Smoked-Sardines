@@ -314,9 +314,10 @@ Background.prototype = new Drawable();
 	this.hide =	false;
 	this.draw = function(){
 		if (!this.hide && !this.drawed){
+			//this.context.globalAlpha = 0.7;
 			this.context.beginPath();
-			this.context.strokeStyle = "black";
-			this.context.fillStyle = "white";
+			this.context.strokeStyle = "rgba(0,0,0,1)";
+			this.context.fillStyle = "rgba(255,255,255,0.9)";
 			this.context.rect(this.x-5, this.y-this.height+5, this.width, this.height);
 			this.context.stroke();
 			this.context.fill();
