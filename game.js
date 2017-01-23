@@ -26,7 +26,10 @@ function init() {
 /*
 *Mouse position Variable
 */
-var mousePos;
+var mousePos ={
+			x: 0,
+			y: 0
+        };
 
 /**
  * QuadTree object.
@@ -927,12 +930,13 @@ function Game() {
 		this.fireCanvas = document.getElementById('faia');
 		this.overlayCanvas = document.getElementById('overlay');
 		//map mouse to move sardina
-		this.shipCanvas.addEventListener('mousemove', 
+		/*this.shipCanvas.addEventListener('mousemove', 
 										function(evt) 
 										{
-											mousePos = getMousePos(document.getElementById('sardina'), evt);
+											mousePos = getMousePos(shipCanvas, evt);
 										},
 										false);
+		*/
 		// Test to see if canvas is supported. Only need to
 		// check one canvas
 		if (this.bgCanvas.getContext) {
@@ -1137,12 +1141,14 @@ document.onkeyup = function(e) {
 *Reads mouse coordinates and returns them
 *
 **/
-function getMousePos(canvas,evt) {
+function getMousePos(evt) {
+		var canvas = document.getElementById("sardina");
         var rect = canvas.getBoundingClientRect();
-        return {
-			x: Math.round((evt.clientX-rect.left)/(rect.right-rect.left)*canvas.width),
-			y: Math.round((evt.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height)
+        mousePos = {
+			x: mousePos.x+Math.round(evt.movementX),
+			y: mousePos.y+Math.round(evt.movementY)
         };
+		//console.log(mousePos);
 }
 /**	
  * requestAnim shim layer by Paul Irish
@@ -1159,3 +1165,36 @@ window.requestAnimFrame = (function(){
 				window.setTimeout(callback, 1000 / 60);
 			};
 })();
+/* 
+*
+*pointer lock object forking for cross browser
+*
+*/
+var canvas = document.getElementById("sardina");
+canvas.requestPointerLock = canvas.requestPointerLock ||
+                            canvas.mozRequestPointerLock;
+
+document.exitPointerLock = document.exitPointerLock ||
+                           document.mozExitPointerLock;
+
+canvas.onclick = function() {
+  canvas.requestPointerLock();
+};
+
+// pointer lock event listeners
+
+// Hook pointer lock state change events for different browsers
+document.addEventListener('pointerlockchange', lockChangeAlert, false);
+document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+
+function lockChangeAlert() {
+  if (document.pointerLockElement === canvas ||
+      document.mozPointerLockElement === canvas) {
+    //console.log('The pointer lock status is now locked');
+    document.addEventListener("mousemove", getMousePos, false);
+  } else {
+    //console.log('The pointer lock status is now unlocked');  
+    document.removeEventListener("mousemove", getMousePos, false);
+  }
+}
+
