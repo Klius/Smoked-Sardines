@@ -315,6 +315,7 @@ Background.prototype = new Drawable();
  function Overlay(){
 	this.letter = "A";
 	this.hide =	false;
+	this.drawed = false;
 	this.draw = function(){
 		if (!this.hide && !this.drawed){
 			//this.context.globalAlpha = 0.7;
@@ -637,15 +638,19 @@ function Sardina() {
 			this.y = mousePos.y;
 			if (this.y >= this.canvasHeight - 60 - this.height){
 					this.y = this.canvasHeight - 60 - this.height;
+					mousePos.y = this.y;
 			}
 			if(this.y <= 60){
 					this.y = 60;
+					mousePos.y = this.y;
 			}
 			if (this.x >= this.canvasWidth - 60 - this.width){
 					this.x = this.canvasWidth - 60 - this.width;
+					mousePos.x = this.x;
 			}
 			if (this.x <= 60){ // Keep player within the screen
 					this.x = 60;
+					mousePos.x = this.x;
 			}
 			// Finish by redrawing the Sardina
 			if (!this.isColliding) {
@@ -915,6 +920,24 @@ Forn.prototype = new Drawable();
  * the game.
  */
 function Game() {
+	this.clicked = false;
+	this.messages = function(){
+		
+		//STARTMESSAGE
+		this.startMessage = new Overlay();
+		this.startMessage.init(this.overlayCanvas.width/2 -130/2,this.overlayCanvas.height/2-30,130,30,0);
+		this.startMessage.letter = "Click me";
+		if(this.startMessage.drawed === false){
+			this.startMessage.draw();
+		}
+		if(this.clicked){
+			this.startMessage.hide = true;
+			this.startMessage.draw();
+		}
+		
+		console.log("Clicked:"+this.clicked+"Hide?:"+this.startMessage.hide+" drawed?:"+this.startMessage.drawed);
+
+	};
 	/*
 	 * Gets canvas information and context and sets up all game
 	 * objects. 
@@ -929,14 +952,7 @@ function Game() {
 		this.mainCanvas = document.getElementById('main');
 		this.fireCanvas = document.getElementById('faia');
 		this.overlayCanvas = document.getElementById('overlay');
-		//map mouse to move sardina
-		/*this.shipCanvas.addEventListener('mousemove', 
-										function(evt) 
-										{
-											mousePos = getMousePos(shipCanvas, evt);
-										},
-										false);
-		*/
+
 		// Test to see if canvas is supported. Only need to
 		// check one canvas
 		if (this.bgCanvas.getContext) {
@@ -982,6 +998,8 @@ function Game() {
 			// Set the sardina to start in the middle of the canvas
 			var shipStartX = this.shipCanvas.width/2 - imageRepository.sardina.width;
 			var shipStartY = this.shipCanvas.height/2;
+			mousePos.x = shipStartX;
+			mousePos.y = shipStartY;
 			this.sardina.init(shipStartX, shipStartY, imageRepository.sardina.width,
 			               imageRepository.sardina.height);
 			
@@ -991,6 +1009,7 @@ function Game() {
 							imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
 				corner.draw();
 			}
+			
 			
 			//AUDIO
 			this.backgroundAudio = new Audio("sounds/loop-1.ogg");
@@ -1016,6 +1035,7 @@ function Game() {
 		this.sardina.draw();
 		this.backgroundAudio.play();
 		this.forncontroller.update();
+		this.messages();
 		animate();
 	};
 }
@@ -1047,7 +1067,7 @@ function animate() {
 	detectCollision();
 
 	// Animate game objects
-	
+	game.messages();
 	requestAnimFrame( animate );
 	game.background.draw();
 	game.sardina.move();
@@ -1170,7 +1190,7 @@ window.requestAnimFrame = (function(){
 *pointer lock object forking for cross browser
 *
 */
-var canvas = document.getElementById("sardina");
+var canvas = document.getElementById("overlay");
 canvas.requestPointerLock = canvas.requestPointerLock ||
                             canvas.mozRequestPointerLock;
 
@@ -1192,9 +1212,11 @@ function lockChangeAlert() {
       document.mozPointerLockElement === canvas) {
     //console.log('The pointer lock status is now locked');
     document.addEventListener("mousemove", getMousePos, false);
+	game.clicked = true;
   } else {
     //console.log('The pointer lock status is now unlocked');  
     document.removeEventListener("mousemove", getMousePos, false);
+	game.clicked = false;
   }
 }
 
