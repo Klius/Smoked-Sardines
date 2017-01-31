@@ -291,7 +291,15 @@ function Drawable() {
  */
 function Background() {
 	this.speed = 1; // Redefine speed of the background for panning
-	
+	var corners = [];
+	this.initCorners = function (){
+		for (var i=0; i <cornCoords.length; i++){
+			var corner = new Corner();
+			corner.init(cornCoords[i].x,cornCoords[i].y,
+						imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
+			corners.push(corner);
+		}
+	};
 	// Implement abstract function
 	this.draw = function() {
 		// Pan background
@@ -303,7 +311,13 @@ function Background() {
 
 		// If the image scrolled off the screen, reset
 		if (this.y >= this.canvasHeight)
+		{
 			this.y = 0;
+		}
+		//Update Corners
+		for (var i=0; i <corners.length; i++){
+			corners[i].draw();
+		}
 	};
 }
 // Set Background to inherit properties from Drawable
@@ -676,12 +690,20 @@ Sardina.prototype = new Drawable();
 *
 **/
 function Corner() {
+	var frames=0;
+	var sx = 0;
+	var swidth = 100;
 	this.draw = this.draw = function() {
 		this.context.save();
 		this.context.translate(this.x + 100/2 , this.y +this.height/2 );
 		this.context.rotate(this.angle * Math.PI / 180);
-		this.context.drawImage(imageRepository.corner,0,0, 100,this.height, -100 /2, -this.height/2,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		if(frames % 4 == 0){
+			sx = sx + swidth == 300 ? 0 : sx+swidth;
+			frames = 0;
+		}
+		this.context.drawImage(imageRepository.corner, sx,0, 100,this.height, -100 /2, -this.height/2,100,this.height);//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
 		this.context.restore();
+		frames++;
 	};
 }
 Corner.prototype = new Drawable();
@@ -935,7 +957,7 @@ function Game() {
 			this.startMessage.draw();
 		}
 		
-		console.log("Clicked:"+this.clicked+"Hide?:"+this.startMessage.hide+" drawed?:"+this.startMessage.drawed);
+		//console.log("Clicked:"+this.clicked+"Hide?:"+this.startMessage.hide+" drawed?:"+this.startMessage.drawed);
 
 	};
 	/*
@@ -989,7 +1011,7 @@ function Game() {
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
-			
+			this.background.initCorners();
 			//Initialize the fornController
 			this.forncontroller = new FornController();
 			this.forncontroller.init();
@@ -1002,13 +1024,6 @@ function Game() {
 			mousePos.y = shipStartY;
 			this.sardina.init(shipStartX, shipStartY, imageRepository.sardina.width,
 			               imageRepository.sardina.height);
-			
-			for (var i=0; i <cornCoords.length; i++){
-				var corner = new Corner();
-				corner.init(cornCoords[i].x,cornCoords[i].y,
-							imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
-				corner.draw();
-			}
 			
 			
 			//AUDIO
