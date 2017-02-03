@@ -13,7 +13,7 @@ var fornCoords = [
 					{"x":300,"y":400,"angle":180,"fireType":1}
 ];
 var cornCoords = [
-					{"x":0,"y":0,"angle":0,"type":1"sx":0,"sy":100},
+					{"x":0,"y":0,"angle":0,"type":1,"sx":0,"sy":100},
 					{"x":400,"y":0,"angle":90},
 					{"x":0,"y":360,"angle":270},
 					{"x":400,"y":360,"angle":0,"type":1,"sx":0,"sy":200}					
