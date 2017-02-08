@@ -291,18 +291,6 @@ function Drawable() {
  */
 function Background() {
 	this.speed = 1; // Redefine speed of the background for panning
-	this.corners = [];
-	this.initCorners = function (){
-		for (var i=0; i <cornCoords.length; i++){
-			var corner = new Corner();
-			corner.init(cornCoords[i].x,cornCoords[i].y,
-						imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
-			corner.sy = cornCoords[i].sy ? cornCoords[i].sy : 0;
-			corner.type = cornCoords[i].type ? cornCoords[i].type : 0;
-			corner.active = cornCoords[i].active;
-			this.corners.push(corner);
-		}
-	};
 	// Implement abstract function
 	this.draw = function() {
 		// Pan background
@@ -316,10 +304,6 @@ function Background() {
 		if (this.y >= this.canvasHeight)
 		{
 			this.y = 0;
-		}
-		//Update Corners
-		for (var i=0; i < this.corners.length; i++){
-			this.corners[i].draw();
 		}
 	};
 }
@@ -694,42 +678,48 @@ Sardina.prototype = new Drawable();
 **/
 function Corner() {
 	var frames=0;
-	var sx = 0;
+	this.sx = 0;
 	this.sy = 0;
 	var swidth = 100;
+	this.direction = swidth;
 	var sheight = 100;
 	var speed = 4;
 	this.type = 0;
-	this.active = true;
+	this.active = false;
 	this.draw = function() {
 		this.update();
 		this.context.save();
 		this.context.translate(this.x + swidth/2 , this.y +sheight/2 );
 		this.context.rotate(this.angle * Math.PI / 180);
 		//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
-		this.context.drawImage(imageRepository.corner, sx,this.sy, swidth,sheight, -swidth /2, -sheight/2,swidth,sheight);
+		this.context.drawImage(imageRepository.corner, this.sx,this.sy, swidth,sheight,
+								-swidth /2, -sheight/2,swidth,sheight);
 		this.context.restore();
 		frames++;
-		
 	};
 	this.update = function(){
 		if(this.active){
 			if(frames % speed == 0){
 				if (this.type == 0){
-					sx = sx + swidth == 300 ? 0 : sx+swidth;
-					frames = 0;
+					this.sx = this.sx + swidth == 300 ? 0 : this.sx+swidth;
 				}
 				else{
-					if(sx == 0){
-						sx = sx + swidth == 400 ? 300: sx + swidth;
-						this.active = sx == 300 ? false : true;
+					if(this.direction > 0){
+						this.sx = this.sx + this.direction;
+						if(this.sx == 300){
+							this.active = false;
+							this.direction *= -1;
+						}
 					}
-					else if( sx == 300){
-						sx = sx - swidth == 0 ? 0: sx - swidth;
-						this.active = sx == 0 ? false : true;
+					else if(this.direction < 0){
+						this.sx = this.sx + this.direction;
+						if(this.sx == 0){
+							this.active = false;
+							this.direction *= -1;
+						}
 					}
-					
 				}
+				frames = 0;
 			}
 		}
 	};
@@ -744,6 +734,7 @@ Corner.prototype = new Drawable();
 function FornController() {
 	this.forns = [];
 	this.overlays = [];
+	this.corners = [];
 	this.fornCap = 4;
 	this.toggleTop = false ;
 	this.toggleBottom = false;
@@ -769,6 +760,18 @@ function FornController() {
 			overlay.letter = fornOverlays[i].letter;
 			this.overlays.push(overlay);
 		}
+			
+		for (var i=0; i <cornCoords.length; i++){
+			var corner = new Corner();
+			corner.init(cornCoords[i].x,cornCoords[i].y,
+						imageRepository.corner.width,imageRepository.corner.height,cornCoords[i].angle);
+			corner.sy = cornCoords[i].sy ? cornCoords[i].sy : 0;
+			corner.type = cornCoords[i].type ? cornCoords[i].type : 0;
+			corner.active = cornCoords[i].active;
+			corner.sx = cornCoords[i].sx;
+			corner.direction = cornCoords[i].direction ? cornCoords[i].direction : 100;
+			this.corners.push(corner);
+		}
 	};
 	this.deactivateForns = function(){
 		if (this.toggleTop){
@@ -778,7 +781,6 @@ function FornController() {
 			this.overlays[0].hide = true;
 			this.overlays[1].hide = true;
 			this.overlays[2].hide = true;
-			game.background.corners[0].active = true;
 		}
 		else{
 			this.forns[3].inUse = false;
@@ -787,7 +789,6 @@ function FornController() {
 			this.overlays[3].hide = true;
 			this.overlays[4].hide = true;
 			this.overlays[5].hide = true;
-			game.background.corners[0].active = true;
 		}
 		if (this.toggleBottom){
 			this.forns[9].inUse = false;
@@ -796,7 +797,6 @@ function FornController() {
 			this.overlays[9].hide = true;
 			this.overlays[10].hide = true;
 			this.overlays[11].hide = true;
-			game.background.corners[3].active = true;
 		}else{
 			this.forns[6].inUse = false;
 			this.forns[7].inUse = false;
@@ -804,8 +804,11 @@ function FornController() {
 			this.overlays[6].hide = true;
 			this.overlays[7].hide = true;
 			this.overlays[8].hide = true;
-			game.background.corners[3].active = true;
 		}
+	};
+	this.moveKnob = function (id){
+		this.corners[id].active = true;
+		//this.corners[0].direction *=-1;
 	};
 	this.readInput = function(){
 		counterTop--;
@@ -814,12 +817,14 @@ function FornController() {
 			if (counterTop <=0){
 				this.toggleTop = this.toggleTop ? false : true;
 				counterTop = 15;
+				this.moveKnob(0);
 			}
 		}
 		if(KEY_STATUS.toogleBottom){
 			if (counterBottom <=0){
 				this.toggleBottom = this.toggleBottom ? false : true;
 				counterBottom = 15;
+				this.moveKnob(3);
 			}
 		}
 		if(this.toggleTop){
@@ -830,7 +835,6 @@ function FornController() {
 			this.overlays[3].hide = false;
 			this.overlays[4].hide = false;
 			this.overlays[5].hide = false;
-			game.background.corners[0].active = true;
 		}else{
 			//TOP ROW
 			this.forns[0].inUse = KEY_STATUS.topLeft ? true : false;
@@ -839,7 +843,6 @@ function FornController() {
 			this.overlays[0].hide = false;
 			this.overlays[1].hide = false;
 			this.overlays[2].hide = false;
-			game.background.corners[0].active = true;
 		}
 		if(this.toggleBottom){
 			//RIGHT ROW
@@ -849,7 +852,6 @@ function FornController() {
 			this.overlays[6].hide = false;
 			this.overlays[7].hide = false;
 			this.overlays[8].hide = false;
-			game.background.corners[3].active = true;
 		}else{
 			//BOTTOM ROW
 			this.forns[9].inUse = KEY_STATUS.bottomLeft ? true : false;
@@ -858,7 +860,6 @@ function FornController() {
 			this.overlays[9].hide = false;
 			this.overlays[10].hide = false;
 			this.overlays[11].hide = false;
-			game.background.corners[3].active = true;
 		}
 	};
 	this.update = function(){
@@ -866,7 +867,10 @@ function FornController() {
 		this.readInput();
 		//shutdown any active forns
 		this.deactivateForns();
-		
+		//Update Corners
+		for (var i=0; i < this.corners.length; i++){
+			this.corners[i].draw();
+		}
 		//update forns and draw
 		for (var i = 0; i< this.forns.length; i++){
 			this.forns[i].move();
@@ -876,6 +880,7 @@ function FornController() {
 		for (var i = 0; i< this.overlays.length; i++){
 			this.overlays[i].draw();
 		}
+
 	};
 }
 /**
@@ -1047,7 +1052,6 @@ function Game() {
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
-			this.background.initCorners();
 			//Initialize the fornController
 			this.forncontroller = new FornController();
 			this.forncontroller.init();

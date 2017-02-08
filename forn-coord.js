@@ -14,9 +14,9 @@ var fornCoords = [
 ];
 var cornCoords = [
 					{"x":0,"y":0,"angle":0,"active":false,"type":1,"sx":0,"sy":100},
-					{"x":400,"y":0,"angle":90,"active":true},
-					{"x":0,"y":360,"angle":270,"active":true},
-					{"x":400,"y":360,"angle":0,"active":false,"type":2,"sx":0,"sy":200}					
+					{"x":400,"y":0,"angle":90,"active":true,"type":0,"sx":0,"sy":0},
+					{"x":0,"y":360,"angle":270,"active":true,"type":0,"sx":0,"sy":0},
+					{"x":400,"y":360,"angle":0,"active":false,"type":2,"sx":300,"sy":200,"direction":-100}					
 ];
 var fornSprite = [
 			[
