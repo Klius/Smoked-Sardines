@@ -11,9 +11,15 @@
 				top: 0px;
 				left: 0px;
 				background: transparent;
-				cursor: none
 			}
 			#background {
+				z-index: -10;
+			}
+			#glass{
+				position: absolute;
+				z-index:-3
+			}
+			#corners{
 				z-index: -2;
 			}
 			#faia{
@@ -36,6 +42,10 @@
 		<canvas id="background" width="500" height="460">
 			Your browser does not support canvas. Please try again with a different browser.
 		</canvas>
+		<!-- The canvas for the panning background -->
+		<canvas id="corners" width="500" height="460">
+			Your browser does not support canvas. Please try again with a different browser.
+		</canvas>
 		<!-- The canvas for Forns -->
 		<canvas id="main" width="500" height="460">
 		</canvas>
@@ -48,7 +58,7 @@
          one forth the screen.) -->
 		<canvas id="sardina" width="500" height="460">
 		</canvas>
-		
+		<img id="glass" src="imgs/glass.png"/>
 		</div>
 		<script src="forn-coord.js"></script>
 		<script src="game.js"></script>

@@ -869,7 +869,7 @@ function FornController() {
 		this.deactivateForns();
 		//Update Corners
 		for (var i=0; i < this.corners.length; i++){
-			this.corners[i].draw();
+				this.corners[i].draw();
 		}
 		//update forns and draw
 		for (var i = 0; i< this.forns.length; i++){
@@ -1015,6 +1015,7 @@ function Game() {
 		this.mainCanvas = document.getElementById('main');
 		this.fireCanvas = document.getElementById('faia');
 		this.overlayCanvas = document.getElementById('overlay');
+		this.cornerCanvas = document.getElementById('corners');
 
 		// Test to see if canvas is supported. Only need to
 		// check one canvas
@@ -1024,6 +1025,7 @@ function Game() {
 			this.mainContext = this.mainCanvas.getContext('2d');
 			this.fireContext = this.fireCanvas.getContext('2d');
 			this.overlayContext = this.overlayCanvas.getContext('2d');
+			this.cornerContext = this.cornerCanvas.getContext('2d');
 			// Initialize objects to contain their context and canvas
 			// information
 			Background.prototype.context = this.bgContext;
@@ -1046,9 +1048,9 @@ function Game() {
 			Overlay.prototype.canvasWidth = this.overlayCanvas.width;
 			Overlay.prototype.canvasHeight = this.overlayCanvas.height;
 			
-			Corner.prototype.context = this.mainContext;
-			Corner.prototype.canvasWidth = this.mainCanvas.width;
-			Corner.prototype.canvasHeight = this.mainCanvas.height;
+			Corner.prototype.context = this.cornerContext;
+			Corner.prototype.canvasWidth = this.cornerCanvas.width;
+			Corner.prototype.canvasHeight = this.cornerCanvas.height;
 			// Initialize the background object
 			this.background = new Background();
 			this.background.init(0,0); // Set draw point to 0,0
