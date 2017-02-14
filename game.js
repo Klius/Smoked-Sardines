@@ -623,6 +623,7 @@ function Sardina() {
 	this.bulletPool.init();
 	this.collidableWith = "Fire";
 	this.type = "Sardina";
+	this.isDead = false;
 	//var fireRate = 15;
 	//var counter = 0;
 	
@@ -631,7 +632,7 @@ function Sardina() {
 	};
 	this.move = function() {	
 		//counter++;
-		
+		if (!this.isColliding) {
 			//clear the sardina
 			this.context.clearRect(this.x, this.y, this.width, this.height);
 			//update position
@@ -654,9 +655,12 @@ function Sardina() {
 					mousePos.x = this.x;
 			}
 			// Finish by redrawing the Sardina
-			if (!this.isColliding) {
-				this.draw();
-			}
+		}
+		else{
+			this.isDead = true;
+			
+		}
+		this.draw();
 		//}
 		
 	};
@@ -1095,6 +1099,12 @@ function Game() {
 		this.messages();
 		animate();
 	};
+	/*
+	*Function that shows everything related to gameover
+	*/
+	this.gamaOvar = function (){
+		
+	};
 }
 
 /**
@@ -1122,10 +1132,9 @@ function animate() {
 		game.quadTree.insert(game.forncontroller.forns[i].firePool.getPool());
 	}
 	detectCollision();
-
+	requestAnimFrame( animate );
 	// Animate game objects
 	game.messages();
-	requestAnimFrame( animate );
 	game.background.draw();
 	game.sardina.move();
 	game.sardina.bulletPool.animate();
