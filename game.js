@@ -624,11 +624,15 @@ function Sardina() {
 	this.collidableWith = "Fire";
 	this.type = "Sardina";
 	this.isDead = false;
+	this.sx = 0;
+	this.swidth = 40;
+	
 	//var fireRate = 15;
 	//var counter = 0;
 	
 	this.draw = function() {
-		this.context.drawImage(imageRepository.sardina, this.x, this.y);
+		//context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+		this.context.drawImage(imageRepository.sardina,this.sx,0,this.swidth,this.height, this.x, this.y,this.swidth,this.height);
 	};
 	this.move = function() {	
 		//counter++;
@@ -658,7 +662,7 @@ function Sardina() {
 		}
 		else{
 			this.isDead = true;
-			
+			this.sx += this.swidth;
 		}
 		this.draw();
 		//}
@@ -1073,7 +1077,7 @@ function Game() {
 			
 			
 			//AUDIO
-			this.backgroundAudio = new Audio("sounds/loop-1.ogg");
+			this.backgroundAudio = new Audio("sounds/loop-2.ogg");
 			this.backgroundAudio.loop = true;
 			this.backgroundAudio.volume = .25;
 			this.backgroundAudio.load();
