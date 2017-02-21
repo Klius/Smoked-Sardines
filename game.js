@@ -993,7 +993,10 @@ Forn.prototype = new Drawable();
 function Game() {
 	this.clicked = false;
 	this.messages = function(){
-		
+		//GameOverMessage
+		var gameover = new Overlay();
+		gameover.init(this.overlayCanvas.width/2 -120/2,this.overlayCanvas.height/2-30,120,30,0);
+		gameover.letter = "Roasted";
 		//STARTMESSAGE
 		this.startMessage = new Overlay();
 		this.startMessage.init(this.overlayCanvas.width/2 -130/2,this.overlayCanvas.height/2-30,130,30,0);
@@ -1005,9 +1008,30 @@ function Game() {
 			this.startMessage.hide = true;
 			this.startMessage.draw();
 		}
+		if(this.sardina.isDead && this.clicked){
+			gameover.hide = false;
+			gameover.draw();
+			
+		}
+		else{
+			gameover.hide = true;
+			gameover.draw();
+		}
 		
-		//console.log("Clicked:"+this.clicked+"Hide?:"+this.startMessage.hide+" drawed?:"+this.startMessage.drawed);
+		//console.log("Clicked:"+this.clicked+"Hide?:"+this.startMessage.hide+" drawed?:"+this.startMessage.drawed+"message:"+this.startMessage.letter);
 
+	};
+	this.readInput = function(){
+		if (this.sardina.isDead){
+			if (KEY_STATUS.space){
+				this.reset();
+			}
+		}
+	};
+	this.reset = function () {
+		this.sardina.isDead = false;
+		this.sardina.sx = 0;
+		this.sardina.isColliding = false;		
 	};
 	/*
 	 * Gets canvas information and context and sets up all game
@@ -1145,6 +1169,7 @@ function animate() {
 	// Clear the fire canvas and redraw!
 	game.fireContext.clearRect(0, 0, game.fireCanvas.width, game.fireCanvas.height);
 	game.forncontroller.update();
+	game.readInput();
 	//game.forn.bulletPool.animate();
 }
 
