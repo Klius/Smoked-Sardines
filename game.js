@@ -650,8 +650,8 @@ function Sardina() {
 					this.y = 60;
 					mousePos.y = this.y;
 			}
-			if (this.x >= this.canvasWidth - 60 - this.width){
-					this.x = this.canvasWidth - 60 - this.width;
+			if (this.x >= this.canvasWidth - 60 - this.width/2){
+					this.x = this.canvasWidth - 60 - this.width/2;
 					mousePos.x = this.x;
 			}
 			if (this.x <= 60){ // Keep player within the screen
