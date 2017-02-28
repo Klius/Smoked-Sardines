@@ -3,18 +3,22 @@
 	<style>
 		div.outer-div {
 			height: 97%;
-			width: 600px;
-			margin-left: auto;
-			margin-right: auto;
-			
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
 
 		div.middle-div {
-			position: relative;
-			top: 50%;
-			-webkit-transform: translateY(-50%);
-			-ms-transform: translateY(-50%);
-			transform: translateY(-50%);
+		}
+		.panel{
+			width:200px;
+			height:460px;
+		}
+		div.left-panel{
+			
+		}
+		div.right-panel{
+			
 		}
 		body{
 			background:url('imgs/bg.png');
@@ -27,8 +31,13 @@
 </head>
 <body>
 	<div class="outer-div">
+		<div class="panel left-panel">
+		
+		</div>
 		<div class="middle-div">
 			<iframe id="frame" height="460" scrolling="no" width="500" src="game.html"></iframe>
+		</div>
+		<div class="panel right-panel">
 		</div>
 	</div>
 	<script>
