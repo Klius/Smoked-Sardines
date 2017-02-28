@@ -1101,7 +1101,7 @@ function Game() {
 			
 			
 			//AUDIO
-			this.backgroundAudio = new Audio("sounds/loop-2.ogg");
+			this.backgroundAudio = new Audio("audio/loop-2.ogg");
 			this.backgroundAudio.loop = true;
 			this.backgroundAudio.volume = .25;
 			this.backgroundAudio.load();
