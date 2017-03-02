@@ -20,6 +20,13 @@
 			margin-left:auto;
 			margin-right:auto;
 		}
+		div.bottom{
+			width: 500px;
+			height: 135px;
+			background-image: url('imgs/bottom.png');
+			margin-left: auto;
+			margin-right: auto;
+		}
 		div.left-panel{
 			background-image:url('imgs/left-panel.png');
 		}
@@ -28,10 +35,23 @@
 		}
 		body{
 			background:url('imgs/bg.png');
+			font-family:arial;
 		}
 		iframe{
 			background-color:white;
 			border: solid black;
+		}
+		a{
+			font-weight:bold;
+			color:white;
+		}
+		a:hover{
+			color:white
+			text-decoration:underline;
+			background-color:red;
+		}
+		a:visited{
+			text-decoration:underline;
 		}
 	</style>
 </head>
@@ -46,7 +66,10 @@
 		<div class="panel right-panel">
 		</div>
 	</div>
-	<script>
-</script>
+	<div class="bottom">
+	</div>
+	<div class="outer-div">
+		<a href="https://github.com/klius/Smoked-Sardines">Source Code</a>
+	</div>
 </body>
 </html>
